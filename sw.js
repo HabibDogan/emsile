@@ -1,4 +1,4 @@
-const CACHE_NAME = "nasara-24-siga-v4";
+const CACHE_NAME = "nasara-24-siga-v5";
 const CORE_ASSETS = [
   "./",
   "./index.html",

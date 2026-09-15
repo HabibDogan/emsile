@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
-<link rel="manifest" href="manifest.json">
+<link rel="manifest" href="manifest.json?v=2">
 <meta name="theme-color" content="#0E2A2B">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -634,6 +634,15 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   });
+}
+
+// Kurulu (standalone) uygulamada bazı Android sürümleri, manifest'teki
+// "orientation" değişikliğini WebAPK yeniden oluşturulana kadar (bu bazen
+// günler sürebilir) uygulamaz. Bunu beklemeden, sayfa açılır açılmaz
+// döndürme kilidini programatik olarak kaldırıyoruz. iOS Safari ve eski
+// tarayıcılarda bu API yok; try/catch ile sessizce atlanır.
+if (screen.orientation && typeof screen.orientation.unlock === "function") {
+  try { screen.orientation.unlock(); } catch (e) { /* desteklenmiyor, sorun değil */ }
 }
 </script>
 
