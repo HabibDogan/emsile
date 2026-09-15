@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نَصَرَ — 24 Sıga</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0E2A2B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Nasara 24">
+<link rel="icon" href="favicon-32.png" sizes="32x32">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  :root{
+    --ink: #0E2A2B;
+    --panel-line: #1E4F4F;
+    --parchment: #F3E9D2;
+    --ink-text: #26231A;
+    --ink-text-soft: #5A5240;
+    --cream: #F3E9D2;
+    --cream-dim: #C9C1A8;
+    --gold: #C6A15B;
+    --gold-bright: #E4C275;
+    --rubric: #B5483D;
+
+    --c-fiil: #3E7C86;
+    --c-isim: #A67C27;
+    --c-taaccub: #B5483D;
+  }
+
+  *{ box-sizing: border-box; }
+
+  body{
+    margin:0;
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 700px at 15% -10%, rgba(198,161,91,0.10), transparent 60%),
+      radial-gradient(900px 600px at 100% 100%, rgba(198,161,91,0.06), transparent 55%),
+      var(--ink);
+    color: var(--cream);
+    font-family: 'Lora', serif;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding: 28px 16px 60px;
+  }
+
+  .ar{ font-family:'Amiri', serif; direction:rtl; unicode-bidi:isolate; }
+
+  header{ width:100%; max-width: 640px; text-align:center; margin-bottom: 22px; }
+  header h1{
+    font-family:'Lora', serif;
+    font-weight:600;
+    font-size: 1.45rem;
+    letter-spacing:.01em;
+    color: var(--gold-bright);
+    margin: 0 0 6px;
+    display:flex;
+    align-items:baseline;
+    justify-content:center;
+    gap:10px;
+  }
+  header h1 .root{ font-family:'Amiri', serif; font-size:1.9rem; direction:rtl; }
+  header p.sub{ margin:0; color: var(--cream-dim); font-size:.92rem; font-style:italic; }
+
+  .progress-row{
+    width:100%; max-width: 640px;
+    display:flex; align-items:center; justify-content:space-between; gap: 14px;
+    margin-bottom: 14px;
+  }
+  .progress-count{ font-variant-numeric: tabular-nums; color: var(--gold); font-size: .95rem; white-space:nowrap; }
+  .progress-track{ flex:1; height:2px; background: var(--panel-line); position:relative; border-radius:2px; overflow:hidden; }
+  .progress-fill{ position:absolute; left:0; top:0; bottom:0; background: var(--gold); transition: width .35s ease; }
+  select#jump{
+    background: var(--ink);
+    color: var(--cream);
+    border: 1px solid var(--panel-line);
+    border-radius: 6px;
+    padding: 5px 8px;
+    font-family:'Lora',serif;
+    font-size: .8rem;
+    max-width: 170px;
+  }
+
+  .legend{
+    width:100%; max-width:640px;
+    display:flex; gap:18px; justify-content:center;
+    margin-bottom:18px;
+    font-size:.78rem;
+    color: var(--cream-dim);
+  }
+  .legend span{ display:flex; align-items:center; gap:6px; }
+  .legend .dot{ width:8px; height:8px; border-radius:50%; }
+
+  .stage{ width:100%; max-width: 640px; }
+
+  .card{
+    position:relative;
+    min-height: 400px;
+    background: var(--parchment);
+    color: var(--ink-text);
+    border-radius: 4px;
+    border: 1px solid rgba(198,161,91,0.55);
+    box-shadow: 0 0 0 1px rgba(198,161,91,0.18), 0 18px 40px rgba(0,0,0,0.35);
+    padding: 30px 30px 26px;
+    cursor:pointer;
+    display:flex;
+    flex-direction:column;
+    transition: opacity .28s ease, transform .28s ease;
+  }
+  .card::before{
+    content:"";
+    position:absolute; inset: 8px;
+    border: 1px solid rgba(181,72,61,0.35);
+    border-radius:2px;
+    pointer-events:none;
+  }
+  .card.turning{ opacity:0; transform: scale(.98); }
+  .card.sliding{ opacity:0; transform: translateX(10px); }
+
+  .face-dots{ display:flex; gap:7px; justify-content:center; margin-bottom: 18px; }
+  .face-dots span{ width:6px; height:6px; border-radius:50%; background: rgba(38,35,26,0.18); }
+  .face-dots span.active{ background: var(--rubric); }
+
+  .kat-badge{
+    display:flex; align-items:center; gap:8px;
+    font-size:.8rem; color: var(--ink-text-soft);
+    margin-bottom: 14px;
+  }
+  .kat-badge .dot{ width:9px; height:9px; border-radius:50%; flex-shrink:0; }
+
+  /* face 1 */
+  .face1{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:14px; }
+  .face1 .ar-word{ font-size: 3rem; line-height:1.35; color:var(--ink-text); }
+  .face1 .tr-word{ font-size: 1.1rem; color: var(--ink-text-soft); font-style:italic; max-width: 30ch; }
+  .tap-hint{ margin-top:6px; font-size:.78rem; color: var(--gold); opacity:.85; }
+
+  /* face 2 */
+  .face2{ flex:1; display:flex; flex-direction:column; gap: 18px; justify-content:center; }
+  .face2 .isim-name{ font-size:1.3rem; font-weight:600; color: var(--rubric); text-align:center; }
+  .vezin-row{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    border-top: 1px solid rgba(38,35,26,0.15);
+    border-bottom: 1px solid rgba(38,35,26,0.15);
+    padding: 12px 0;
+  }
+  .vezin-row .label{ font-size:.78rem; color: var(--ink-text-soft); }
+  .vezin-row .val{ font-size:1.5rem; }
+  .aciklama{
+    font-size:.95rem;
+    line-height:1.6;
+    color: var(--ink-text-soft);
+    text-align:center;
+  }
+
+  /* face 3 */
+  .face3{ flex:1; display:flex; flex-direction:column; gap:14px; justify-content:center; }
+  .ornek-type{ font-size:.8rem; color: var(--rubric); font-style:italic; text-align:center; }
+  .ornek-ar{ font-size:1.65rem; line-height:2; text-align:center; }
+  .ornek-tr{ font-size:1rem; color: var(--ink-text-soft); text-align:center; }
+  .ornek-kaynak{
+    text-align:center; font-size:.85rem; color: var(--gold-bright);
+    background: var(--ink);
+    display:inline-block; padding: 4px 12px; border-radius: 3px;
+    margin: 0 auto;
+  }
+  .ornek-not{
+    font-size:.8rem; color: var(--ink-text-soft);
+    border-top: 1px dashed rgba(38,35,26,0.25);
+    padding-top:10px; line-height:1.5; text-align:center;
+  }
+
+  .nav-row{ width:100%; max-width:640px; display:flex; align-items:center; justify-content:space-between; margin-top: 20px; }
+  .nav-btn{
+    background:none; border: 1px solid var(--panel-line); color: var(--cream);
+    font-family:'Lora',serif; font-size: .95rem; padding: 10px 18px; border-radius: 4px;
+    cursor:pointer; transition: border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .nav-btn:hover{ border-color: var(--gold); color: var(--gold-bright); background: rgba(198,161,91,0.06); }
+  .nav-btn:focus-visible{ outline: 2px solid var(--gold); outline-offset: 2px; }
+  .nav-btn.primary{ border-color: var(--gold); color: var(--ink); background: var(--gold); font-weight:600; }
+  .nav-btn.primary:hover{ background: var(--gold-bright); border-color: var(--gold-bright); }
+
+  .face-hint{ text-align:center; color: var(--cream-dim); font-size: .82rem; margin-top: 10px; max-width: 640px; }
+
+  .hashiye{ margin-top: 46px; max-width: 640px; width:100%; border-top: 1px solid var(--panel-line); padding-top: 18px; }
+  .hashiye .h-label{ font-size:.78rem; color: var(--gold); margin-bottom:6px; font-style:italic; }
+  .hashiye p{ margin:0 0 10px; font-size:.85rem; line-height:1.65; color: var(--cream-dim); }
+  .hashiye p:last-child{ margin-bottom:0; }
+
+  @media (max-width: 480px){
+    .card{ padding: 22px 18px 20px; min-height: 420px; }
+    .face1 .ar-word{ font-size: 2.4rem; }
+    .ornek-ar{ font-size:1.3rem; }
+    header h1{ font-size:1.15rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card, .progress-fill{ transition:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><span class="ar root">نَصَرَ</span> Fiilinin 24 Sigası</h1>
+  <p class="sub">Tek kökün mazisi, muzarisi ve türemiş 24 hâli</p>
+</header>
+
+<div class="progress-row">
+  <span class="progress-count" id="progressCount">1 / 24</span>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <select id="jump" aria-label="Sigaya git"></select>
+</div>
+
+<div class="legend">
+  <span><span class="dot" style="background:var(--c-fiil)"></span>Fiil sigaları</span>
+  <span><span class="dot" style="background:var(--c-isim)"></span>İsim sigaları</span>
+  <span><span class="dot" style="background:var(--c-taaccub)"></span>Ta'accüb</span>
+</div>
+
+<div class="stage">
+  <div class="card" id="card" role="button" tabindex="0" aria-label="Kartın diğer yüzünü görmek için tıklayın">
+    <div class="face-dots" id="faceDots">
+      <span class="active"></span><span></span><span></span>
+    </div>
+    <div id="cardInner"></div>
+  </div>
+</div>
+
+<p class="face-hint" id="faceHint">Karta tıkla veya dokun — kelime → sarf bilgisi → örnek</p>
+
+<div class="nav-row">
+  <button class="nav-btn" id="prevBtn">‹ Geri</button>
+  <button class="nav-btn primary" id="nextBtn">İleri ›</button>
+</div>
+
+<div class="hashiye">
+  <div class="h-label">Hâşiye (kenar notu)</div>
+  <p>
+    Bu 24 sıga, verdiğiniz "Emsile-i Muhtelife" tablosundaki sıra ve isimlendirmeye
+    göre hazırlanmıştır. Ayet meâlleri özetlenerek verilmiştir; sınıfta kullanmadan önce
+    sure/ayet numaralarını bir mushaftan teyit etmenizi tavsiye ederiz.
+  </p>
+  <p>
+    "Örnek cümle" etiketli kartlarda kelime Kur'an'da bu vezinle doğrudan geçmediği için
+    (mastar-ı merre, ismi tasğir, ismi mensûb, ta'accüb kalıpları gibi büyük ölçüde
+    sarf alıştırması amaçlı türetilmiş sigalardır) tarafımca kurulmuş sade bir Arapça
+    cümle tercih edilmiştir.
+  </p>
+</div>
+
+<script>
+const SIGALAR = [{"ar":"نَصَرَ","tr":"yardım etti","isim":"Fi'li Mâzî","kategori":"fiil","vezin":"فَعَلَ","aciklama":"Geçmişte, kesin olarak gerçekleşmiş bir işi bildirir.","ornek":{"tip":"ayet","ar":"لَقَدْ نَصَرَكُمُ اللَّهُ فِي مَوَاطِنَ كَثِيرَةٍ","tr":"Andolsun, Allah birçok yerde size yardım etmiştir.","kaynak":"Tevbe Suresi, 25. Ayet","not":null}},{"ar":"يَنْصُرُ","tr":"yardım eder / ediyor","isim":"Fi'li Muzâri'","kategori":"fiil","vezin":"يَفْعُلُ","aciklama":"Şimdiki veya gelecek zamanda yapılan/yapılacak bir işi bildirir.","ornek":{"tip":"ayet","ar":"إِن يَنصُرْكُمُ اللَّهُ فَلَا غَالِبَ لَكُمْ","tr":"Allah size yardım ederse, artık sizi yenecek yoktur.","kaynak":"Âl-i İmrân Suresi, 160. Ayet","not":"Ayette nesne eki alarak \"يَنصُرْكُمُ\" (size yardım eder) şeklinde geçer."}},{"ar":"نَصْراً","tr":"yardım etmek","isim":"Mastar Gayr-i Mîmî","kategori":"isim","vezin":"فَعْلًا","aciklama":"Fiilin, zaman kavramı taşımayan iş adını; başında mim harfi olmayan asıl masdar şeklini bildirir.","ornek":{"tip":"ayet","ar":"وَيَنصُرَكَ اللَّهُ نَصْرًا عَزِيزًا","tr":"Ve Allah sana şanlı bir zaferle yardım etsin diye.","kaynak":"Fetih Suresi, 3. Ayet","not":null}},{"ar":"نَاصِرٌ","tr":"yardım eden","isim":"İsmi Fâil","kategori":"isim","vezin":"فَاعِلٌ","aciklama":"İşi yapanı bildiren sıfattır; \"yapan / eden\" anlamı taşır.","ornek":{"tip":"ayet","ar":"أُولَٰئِكَ الَّذِينَ حَبِطَتْ أَعْمَالُهُمْ فِي الدُّنْيَا وَالْآخِرَةِ وَمَا لَهُم مِّن نَّاصِرِينَ","tr":"Onların dünyada ve ahirette amelleri boşa gitmiştir; onların hiçbir yardımcısı da yoktur.","kaynak":"Âl-i İmrân Suresi, 22. Ayet","not":"Ayette çoğul \"نَّاصِرِينَ\" (nâsırîn) şeklinde geçer; kök ve vezin aynıdır."}},{"ar":"مَنْصُورٌ","tr":"yardım olunan","isim":"İsmi Mef'ûl","kategori":"isim","vezin":"مَفْعُولٌ","aciklama":"İş kendisine yapılanı bildiren sıfattır; \"yapılan / edilen\" anlamı taşır.","ornek":{"tip":"ayet","ar":"فَلَا يُسْرِف فِّي الْقَتْلِ ۖ إِنَّهُ كَانَ مَنصُورًا","tr":"Öldürmede ölçüyü aşmasın; çünkü o (kısas hakkı olan) zaten yardım görmüştür.","kaynak":"İsrâ Suresi, 33. Ayet","not":null}},{"ar":"لَمْ يَنْصُرْ","tr":"yardım etmedi","isim":"Cahdi Mutlak","kategori":"fiil","vezin":"لَمْ يَفْعُلْ","aciklama":"Geçmişte hiç gerçekleşmemiş bir işi, \"لَمْ\" ile kesin olarak olumsuzlar.","ornek":{"tip":"cumle","ar":"لَمْ يَنصُرْهُ أَحَدٌ عِندَ الشِّدَّةِ","tr":"Zorluk anında ona kimse yardım etmedi.","kaynak":null,"not":null}},{"ar":"لَمَّا يَنْصُرْ","tr":"henüz yardım etmedi","isim":"Cahdi Müstağrak","kategori":"fiil","vezin":"لَمَّا يَفْعُلْ","aciklama":"Geçmişten şimdiye kadar hâlâ gerçekleşmemiş bir işi, \"لَمَّا\" ile bildirir; \"henüz\" anlamı taşır.","ornek":{"tip":"cumle","ar":"لَمَّا يَنصُرْهُ صَدِيقُهُ بَعْدُ","tr":"Arkadaşı ona henüz yardım etmedi.","kaynak":null,"not":null}},{"ar":"مَا يَنْصُرُ","tr":"yardım etmiyor","isim":"Nefî Hâl","kategori":"fiil","vezin":"مَا يَفْعُلُ","aciklama":"Şu anda yapılmayan bir işi, \"مَا\" ile olumsuzlar.","ornek":{"tip":"cumle","ar":"مَا يَنصُرُ الظَّالِمَ أَحَدٌ","tr":"Zalime kimse yardım etmiyor.","kaynak":null,"not":null}},{"ar":"لَا يَنْصُرُ","tr":"yardım etmez","isim":"Nefî İstikbal","kategori":"fiil","vezin":"لَا يَفْعُلُ","aciklama":"Gelecekte yapılmayacak bir işi, \"لَا\" ile olumsuzlar.","ornek":{"tip":"cumle","ar":"لَا يَنصُرُ الْكَذِبُ صَاحِبَهُ","tr":"Yalan, sahibine yardımcı olmaz.","kaynak":null,"not":null}},{"ar":"لَنْ يَنْصُرَ","tr":"asla yardım etmez","isim":"Tekîdi Nefî İstikbâl","kategori":"fiil","vezin":"لَنْ يَفْعَلَ","aciklama":"Gelecekte kesinlikle yapılmayacağını, \"لَنْ\" ile vurgulu şekilde bildirir.","ornek":{"tip":"cumle","ar":"لَن يَنصُرَ الْبَاطِلَ أَحَدٌ فِي النِّهَايَةِ","tr":"Sonunda hiç kimse batıla yardım etmeyecektir.","kaynak":null,"not":null}},{"ar":"لِيَنْصُرْ","tr":"yardım etsin","isim":"Emri Gâib","kategori":"fiil","vezin":"لِيَفْعُلْ","aciklama":"Gaib (o / onlar) için \"لِـ\" ile kurulan emir kalıbıdır; \"yapsın\" anlamı taşır.","ornek":{"tip":"cumle","ar":"لِيَنصُرِ الْقَوِيُّ الضَّعِيفَ","tr":"Güçlü olan, zayıfa yardım etsin.","kaynak":null,"not":null}},{"ar":"لَا يَنْصُرْ","tr":"yardım etmesin","isim":"Nehyi Gâib","kategori":"fiil","vezin":"لَا يَفْعُلْ","aciklama":"Gaib için \"لَا\" ile kurulan yasaklama kalıbıdır; \"yapmasın\" anlamı taşır.","ornek":{"tip":"cumle","ar":"لَا يَنصُرِ الظَّالِمَ أَحَدٌ مِنكُمْ","tr":"Sizden hiç kimse zalime yardım etmesin.","kaynak":null,"not":null}},{"ar":"اُنْصُرْ","tr":"yardım et","isim":"Emri Hâzır","kategori":"fiil","vezin":"اُفْعُلْ","aciklama":"Muhatap (karşıdaki kişi) için doğrudan emir kalıbıdır; \"yap\" anlamı taşır.","ornek":{"tip":"ayet","ar":"رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا وَثَبِّتْ أَقْدَامَنَا وَانصُرْنَا عَلَى الْقَوْمِ الْكَافِرِينَ","tr":"Rabbimiz! Üzerimize sabır yağdır, ayaklarımızı sabit kıl ve kâfirler topluluğuna karşı bize yardım et.","kaynak":"Bakara Suresi, 250. Ayet","not":"Ayette nesne eki alarak \"وَانصُرْنَا\" (bize yardım et) şeklinde geçer."}},{"ar":"لَا تَنْصُرْ","tr":"yardım etme","isim":"Nehyi Hâzır","kategori":"fiil","vezin":"لَا تَفْعُلْ","aciklama":"Muhatabı bir işten \"لَا\" ile men eden yasaklama kalıbıdır; \"yapma\" anlamı taşır.","ornek":{"tip":"cumle","ar":"لَا تَنصُرِ الظَّالِمَ عَلَى ظُلْمِهِ","tr":"Zalime, zulmünde yardım etme.","kaynak":null,"not":null}},{"ar":"مَنْصَرٌ","tr":"yardım edecek zaman / mekân; yardım etmek","isim":"İsmi Zaman, İsmi Mekân, Mastar-ı Mîmî","kategori":"isim","vezin":"مَفْعَلٌ","aciklama":"İşin yapıldığı zamanı veya yeri bildirir; başında mim harfi bulunan masdar da aynı vezindedir.","ornek":{"tip":"cumle","ar":"كَانَ مَنصَرُ الْجَيْشِ عِندَ الْجَبَلِ","tr":"Ordunun yardım/zafer yeri dağın yanındaydı.","kaynak":null,"not":null}},{"ar":"مِنْصَرٌ","tr":"yardım edecek alet","isim":"İsmi Âlet","kategori":"isim","vezin":"مِفْعَلٌ","aciklama":"İşin yapılmasında kullanılan aracı/aleti bildirir.","ornek":{"tip":"cumle","ar":"كَانَ ذَٰلِكَ الْكِتَابُ مِنصَرَهُ فِي أَوْقَاتِ الضَّعْفِ","tr":"O kitap, zayıflık anlarında onun yardımcı aracıydı.","kaynak":null,"not":null}},{"ar":"نَصْرَةٌ","tr":"bir kere yardım etmek","isim":"Mastar-ı Binâi Merre","kategori":"isim","vezin":"فَعْلَةٌ","aciklama":"İşin bir defa yapıldığını bildiren masdar şeklidir.","ornek":{"tip":"cumle","ar":"قَدَّمَ لَهُ نَصْرَةً وَاحِدَةً ثُمَّ تَرَكَهُ","tr":"Ona bir kez yardım etti, sonra onu bıraktı.","kaynak":null,"not":null}},{"ar":"نِصْرَةٌ","tr":"bir çeşit yardım etmek","isim":"Mastar-ı Binâi Nev'","kategori":"isim","vezin":"فِعْلَةٌ","aciklama":"İşin yapılış biçimini/çeşidini bildiren masdar şeklidir.","ornek":{"tip":"cumle","ar":"كَانَتْ تِلْكَ نِصْرَةً خَاصَّةً مِن نَّوْعِهَا","tr":"Bu, kendine özgü bir tür yardımdı.","kaynak":null,"not":null}},{"ar":"نُصَيْرٌ","tr":"az yardım etmek","isim":"İsmi Tasğîr","kategori":"isim","vezin":"فُعَيْلٌ","aciklama":"İsmi; küçültme, azlık veya sevgi ifadesiyle bildiren küçültme (tasgir) kalıbıdır.","ornek":{"tip":"cumle","ar":"قَدَّمَ الطِّفْلُ نُصَيْرًا صَغِيرًا لِأَبِيهِ","tr":"Çocuk, babasına küçük bir yardımda bulundu.","kaynak":null,"not":null}},{"ar":"نَصْرِيٌّ","tr":"yardım etmeye mensup","isim":"İsmi Mensûb","kategori":"isim","vezin":"فَعْلِيٌّ","aciklama":"Bir şeye aidiyeti/mensubiyeti bildirir; sonuna nispet yâ'sı (ي) eklenerek yapılır.","ornek":{"tip":"cumle","ar":"هَٰذَا مَشْرُوعٌ نَصْرِيٌّ يَخْدُمُ الْمُحْتَاجِينَ","tr":"Bu, muhtaçlara hizmet eden bir yardım projesidir.","kaynak":null,"not":null}},{"ar":"نَصَّارٌ","tr":"çok yardım eden","isim":"Mübalağalı İsmi Fâil","kategori":"isim","vezin":"فَعَّالٌ","aciklama":"İşi çokça/alışkanlık hâlinde yapanı bildiren abartı (mübalağa) kalıbıdır.","ornek":{"tip":"cumle","ar":"كَانَ ذَٰلِكَ الرَّجُلُ نَصَّارًا لِلْفُقَرَاءِ فِي بَلَدِهِ","tr":"O adam, memleketindeki fakirlere çokça yardım eden biriydi.","kaynak":null,"not":null}},{"ar":"أَنْصَرُ","tr":"daha çok yardım eden","isim":"İsmi Tafdîl","kategori":"isim","vezin":"أَفْعَلُ","aciklama":"İki şey arasında üstünlük/karşılaştırma bildirir; \"daha... / en...\" anlamı taşır.","ornek":{"tip":"cumle","ar":"هُوَ أَنصَرُ النَّاسِ لِأَصْدِقَائِهِ","tr":"O, arkadaşlarına insanların en çok yardım edenidir.","kaynak":null,"not":null}},{"ar":"مَا أَنْصَرَهُ","tr":"ne acayip yardım etti","isim":"Fiili Tea'ccübi Evvel","kategori":"taaccub","vezin":"مَا أَفْعَلَهُ","aciklama":"\"مَا أَفْعَلَهُ\" kalıbıyla kurulan, bir niteliğe duyulan hayret/şaşkınlığı bildiren kalıptır.","ornek":{"tip":"cumle","ar":"مَا أَنصَرَهُ لِجَارِهِ فِي وَقْتِ الشِّدَّةِ","tr":"Zor zamanda komşusuna ne kadar da çok yardım etti!","kaynak":null,"not":null}},{"ar":"أَنْصِرْ بِهِ","tr":"ne acayip yardım etti","isim":"Fiili Tea'ccübi Sânî","kategori":"taaccub","vezin":"أَفْعِلْ بِهِ","aciklama":"\"أَفْعِلْ بِهِ\" kalıbıyla kurulan, birinci ta'accüb kalıbıyla aynı anlamı taşıyan ikinci hayret/şaşkınlık kalıbıdır.","ornek":{"tip":"cumle","ar":"أَنصِرْ بِالْمُعَلِّمِ لِطُلَّابِهِ","tr":"Öğretmenin öğrencilerine yardımı ne kadar da çoktur!","kaynak":null,"not":null}}];
+
+const KAT_RENK = { fiil: 'var(--c-fiil)', isim: 'var(--c-isim)', taaccub: 'var(--c-taaccub)' };
+const KAT_AD = { fiil: 'Fiil sigası', isim: 'İsim sigası', taaccub: "Ta'accüb kalıbı" };
+
+let idx = 0;
+let face = 0;
+const cardEl = document.getElementById('card');
+const inner = document.getElementById('cardInner');
+const dotsEl = document.getElementById('faceDots');
+const progressCount = document.getElementById('progressCount');
+const progressFill = document.getElementById('progressFill');
+const faceHint = document.getElementById('faceHint');
+const jumpSel = document.getElementById('jump');
+
+const HINTS = [
+  'Karta tıkla veya dokun — kelime → sarf bilgisi → örnek',
+  'Sarf bilgisi görüntüleniyor — tekrar tıkla, örnek cümleyi gör',
+  'Örnek görüntüleniyor — tekrar tıkla, kelimeye dön · İleri ile sıradaki sigaya geç'
+];
+
+function buildJumpOptions(){
+  SIGALAR.forEach((k, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = (i+1) + '. ' + k.isim;
+    jumpSel.appendChild(opt);
+  });
+}
+
+function renderFace1(k){
+  return `
+    <div class="face1">
+      <div class="ar-word ar">${k.ar}</div>
+      <div class="tr-word">${k.tr}</div>
+      <div class="tap-hint">devamı için dokun</div>
+    </div>`;
+}
+
+function renderFace2(k){
+  return `
+    <div class="kat-badge"><span class="dot" style="background:${KAT_RENK[k.kategori]}"></span>${KAT_AD[k.kategori]}</div>
+    <div class="face2">
+      <div class="isim-name">${k.isim}</div>
+      <div class="vezin-row"><span class="label">Vezni:</span><span class="val ar">${k.vezin}</span></div>
+      <div class="aciklama">${k.aciklama}</div>
+    </div>`;
+}
+
+function renderFace3(k){
+  const o = k.ornek;
+  const tipLabel = o.tip === 'ayet' ? 'Ayet-i Kerime' : (o.tip === 'hadis' ? 'Hadis-i Şerif' : 'Örnek cümle');
+  const kaynakHtml = o.kaynak ? `<div class="ornek-kaynak">${o.kaynak}</div>` : '';
+  const notHtml = o.not ? `<div class="ornek-not">${o.not}</div>` : '';
+  return `
+    <div class="face3">
+      <div class="ornek-type">${tipLabel}</div>
+      <div class="ornek-ar ar">${o.ar}</div>
+      <div class="ornek-tr">"${o.tr}"</div>
+      ${kaynakHtml}
+      ${notHtml}
+    </div>`;
+}
+
+function renderInner(){
+  const k = SIGALAR[idx];
+  if(face === 0) inner.innerHTML = renderFace1(k);
+  else if(face === 1) inner.innerHTML = renderFace2(k);
+  else inner.innerHTML = renderFace3(k);
+
+  [...dotsEl.children].forEach((d,i) => d.classList.toggle('active', i === face));
+  faceHint.textContent = HINTS[face];
+}
+
+function updateProgress(){
+  progressCount.textContent = (idx+1) + ' / ' + SIGALAR.length;
+  progressFill.style.width = ((idx+1)/SIGALAR.length*100) + '%';
+  jumpSel.value = idx;
+}
+
+function goFace(next){
+  cardEl.classList.add('turning');
+  setTimeout(() => {
+    face = next;
+    renderInner();
+    cardEl.classList.remove('turning');
+  }, 140);
+}
+
+function goCard(newIdx){
+  idx = (newIdx + SIGALAR.length) % SIGALAR.length;
+  face = 0;
+  cardEl.classList.add('sliding');
+  setTimeout(() => {
+    renderInner();
+    updateProgress();
+    cardEl.classList.remove('sliding');
+  }, 140);
+}
+
+cardEl.addEventListener('click', () => goFace((face+1) % 3));
+cardEl.addEventListener('keydown', (e) => {
+  if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); goFace((face+1) % 3); }
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => goCard(idx+1));
+document.getElementById('prevBtn').addEventListener('click', () => goCard(idx-1));
+jumpSel.addEventListener('change', () => goCard(parseInt(jumpSel.value, 10)));
+
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'ArrowRight') goCard(idx+1);
+  if(e.key === 'ArrowLeft') goCard(idx-1);
+});
+
+buildJumpOptions();
+renderInner();
+updateProgress();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>
