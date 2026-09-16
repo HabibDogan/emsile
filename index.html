@@ -111,6 +111,52 @@
     border-radius: 6px; padding: 5px 8px; font-family:'Lora',serif; font-size: .8rem; max-width: 170px;
   }
 
+  /* ===== aktif kök rozeti ===== */
+  .root-badge{
+    width:100%; max-width:640px; display:flex; align-items:center; justify-content:center; gap:10px;
+    margin-bottom:14px; font-size:.85rem; color: var(--cream-dim);
+  }
+  .root-badge .rb-ar{ font-family:'Amiri',serif; color: var(--gold-bright); font-size:1.1rem; }
+  .root-badge button{
+    background:none; border:1px solid var(--panel-line); color: var(--cream-dim);
+    border-radius:5px; padding:3px 10px; font-family:'Lora',serif; font-size:.76rem; cursor:pointer;
+  }
+  .root-badge button:hover{ border-color: var(--gold); color: var(--gold-bright); }
+  .root-badge:empty{ display:none; margin-bottom:0; }
+
+  /* ===== Farklı Fiiller sekmesi ===== */
+  .fiiller-intro{
+    max-width:640px; width:100%; text-align:center; color: var(--cream-dim);
+    font-size:.9rem; line-height:1.6; margin: 0 0 20px;
+  }
+  .fiil-grid{
+    max-width:640px; width:100%; display:grid;
+    grid-template-columns: repeat(2, 1fr); gap:10px;
+  }
+  .fiil-btn{
+    background: var(--parchment); border: 1px solid rgba(198,161,91,0.4);
+    border-radius:6px; padding:12px 10px; text-align:center; cursor:pointer;
+    display:flex; flex-direction:column; gap:4px; align-items:center;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  .fiil-btn:hover{ border-color: var(--rubric); transform: translateY(-1px); }
+  .fiil-btn .fb-ar{ font-family:'Amiri',serif; font-size:1.5rem; color: var(--ink-text); }
+  .fiil-btn .fb-tr{ font-family:'Lora',serif; font-size:.8rem; color: var(--ink-text-soft); font-style:italic; }
+  .fiil-btn.active{ border-color: var(--gold); box-shadow: 0 0 0 2px rgba(198,161,91,0.35); }
+  .fiil-btn.nasara-btn{ grid-column: 1 / -1; background: var(--gold); }
+  .fiil-btn.nasara-btn .fb-ar, .fiil-btn.nasara-btn .fb-tr{ color: var(--ink); }
+
+  /* ===== karşılaştırma yüzü (Farklı Fiiller'de örnek yerine) ===== */
+  .karsilastirma-label{ font-size:.85rem; color: var(--ink-text-soft); text-align:center; }
+  .karsilastirma-row{
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    margin-top:10px; flex-wrap:wrap;
+  }
+  .karsilastirma-row .k-item{ text-align:center; }
+  .karsilastirma-row .k-item .ar{ font-size:1.7rem; display:block; }
+  .karsilastirma-row .k-item .lbl{ font-size:.75rem; color: var(--ink-text-soft); margin-top:4px; }
+  .karsilastirma-row .k-arrow{ font-size:1.3rem; color: var(--rubric); }
+
   .legend{ width:100%; max-width:640px; display:flex; gap:18px; justify-content:center; margin-bottom:18px; font-size:.78rem; color: var(--cream-dim); }
   .legend span{ display:flex; align-items:center; gap:6px; }
   .legend .dot{ width:8px; height:8px; border-radius:50%; }
@@ -235,7 +281,7 @@
     header{ margin-bottom: 10px; }
     header p.sub{ display:none; }
     .mode-tabs{ margin: 10px 0 12px; }
-    .stage, .progress-row, .legend, .nav-row, .stats-row, .test-nav, .hashiye{ max-width: 720px; }
+    .stage, .progress-row, .legend, .nav-row, .stats-row, .test-nav, .hashiye, .fiil-grid, .fiiller-intro, .root-badge{ max-width: 720px; }
     .card{ min-height: 260px; padding: 20px 26px 18px; }
     .face1{ gap:8px; }
     .face1 .ar-word{ font-size: 2.4rem; }
@@ -258,10 +304,13 @@
 <div class="mode-tabs">
   <button class="mode-tab active" id="tabOgren">Öğren</button>
   <button class="mode-tab" id="tabTest">Test Et</button>
+  <button class="mode-tab" id="tabFiiller">Farklı Fiiller</button>
 </div>
 
 <!-- ================= ÖĞREN MODE ================= -->
 <div id="ogrenView">
+  <div class="root-badge" id="rootBadgeOgren"></div>
+
   <div class="progress-row">
     <span class="progress-count" id="progressCount">1 / 24</span>
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
@@ -284,11 +333,13 @@
   </div>
 
   <p class="face-hint" id="faceHint">Karta tıkla veya dokun — kelime → sarf bilgisi → örnek</p>
-  <p class="face-hint swipe-hint">‹ Kaydırarak diğer sigaya geç ›</p>
+  <p class="face-hint swipe-hint" id="swipeHint">‹ Kaydırarak diğer sigaya geç ›</p>
 </div>
 
 <!-- ================= TEST MODE ================= -->
 <div id="testView" class="hidden">
+  <div class="root-badge" id="rootBadgeTest"></div>
+
   <div class="stats-row">
     <span>Bu oturum: <strong id="statCorrect">0</strong> doğru / <strong id="statWrong">0</strong> yanlış</span>
     <span class="mastered" id="statMastered">Ustalaşılan: 0/24</span>
@@ -310,8 +361,27 @@
   </div>
 </div>
 
+<!-- ================= FARKLI FİİLLER MODE ================= -->
+<div id="fiillerView" class="hidden">
+  <p class="fiiller-intro">
+    Aşağıdaki fiillerden birine dokunun — <strong>Öğren</strong> ve <strong>Test Et</strong>
+    bölümleri o fiile göre yeniden düzenlensin. Hepsi نَصَرَ gibi sahih (sağlam) fiillerdir,
+    bu yüzden aynı 24 kalıba harfi harfine uyarlar.
+  </p>
+  <div class="fiil-grid" id="fiilGrid"></div>
+</div>
+
 <div class="hashiye">
   <div class="h-label">Hâşiye (kenar notu)</div>
+  <p>
+    <strong>Farklı Fiiller</strong> sekmesindeki 20 fiilin Arapça 24 hâli, نَصَرَ ile birebir
+    aynı kalıp (vezin) üzerinden mekanik olarak üretilmiştir — bu yüzden Arapça kısmı kesin
+    doğrudur. Ancak gerçek hayatta bazı fiillerin masdarı (iş adı) kalıba tam uymayabilir
+    (ör. دَخَلَ'nin gerçek masdarı دُخُولًا'dur, kalıba göre üretilen دَخْلًا değil) — bu,
+    Arapçada masdarların ezbere öğrenilmesi gerektiği içindir. Bu sekmedeki amaç, öğrenilen
+    kalıbı yeni bir köke <em>uygulayabilmeyi</em> pekiştirmektir; örnek cümle yerine her formun
+    نَصَرَ karşılığı gösterilir.
+  </p>
   <p>
     <strong>Öğren</strong> modu kartları sırayla gösterir. <strong>Test Et</strong> modu ise
     rastgele ve karışık sırada soru sorar; yanlış cevapladığınız sigalar daha sık,
@@ -326,10 +396,56 @@
 </div>
 
 <script>
-const SIGALAR = [{"ar":"نَصَرَ","tr":"yardım etti","isim":"Fiil-i Mâzî","kategori":"fiil","vezin":"فَعَلَ","aciklama":"Geçmişte, kesin olarak gerçekleşmiş bir işi bildirir.","ornek":{"tip":"ayet","ar_once":"لَقَدْ ","ar_vurgu":"نَصَرَكُمُ","ar_sonra":" اللَّهُ فِي مَوَاطِنَ كَثِيرَةٍ","tr":"Andolsun, Allah birçok yerde size yardım etmiştir.","kaynak":"Tevbe Suresi, 25. Ayet","not":null}},{"ar":"يَنْصُرُ","tr":"yardım eder / ediyor","isim":"Fiil-i Muzâri'","kategori":"fiil","vezin":"يَفْعُلُ","aciklama":"Şimdiki veya gelecek zamanda yapılan/yapılacak bir işi bildirir.","ornek":{"tip":"ayet","ar_once":"إِن ","ar_vurgu":"يَنصُرْكُمُ","ar_sonra":" اللَّهُ فَلَا غَالِبَ لَكُمْ","tr":"Allah size yardım ederse, artık sizi yenecek yoktur.","kaynak":"Âl-i İmrân Suresi, 160. Ayet","not":"Ayette nesne eki alarak \"يَنصُرْكُمُ\" (size yardım eder) şeklinde geçer."}},{"ar":"نَصْراً","tr":"yardım etmek","isim":"Mastar Gayr-i Mîmî","kategori":"isim","vezin":"فَعْلًا","aciklama":"Fiilin, zaman kavramı taşımayan iş adını; başında mim harfi olmayan asıl masdar şeklini bildirir.","ornek":{"tip":"ayet","ar_once":"وَيَنصُرَكَ اللَّهُ ","ar_vurgu":"نَصْرًا","ar_sonra":" عَزِيزًا","tr":"Ve Allah sana şanlı bir zaferle yardım etsin diye.","kaynak":"Fetih Suresi, 3. Ayet","not":null}},{"ar":"نَاصِرٌ","tr":"yardım eden","isim":"İsm-i Fâil","kategori":"isim","vezin":"فَاعِلٌ","aciklama":"İşi yapanı bildiren sıfattır; \"yapan / eden\" anlamı taşır.","ornek":{"tip":"ayet","ar_once":"أُولَٰئِكَ الَّذِينَ حَبِطَتْ أَعْمَالُهُمْ فِي الدُّنْيَا وَالْآخِرَةِ وَمَا لَهُم مِّن ","ar_vurgu":"نَّاصِرِينَ","ar_sonra":"","tr":"Onların dünyada ve ahirette amelleri boşa gitmiştir; onların hiçbir yardımcısı da yoktur.","kaynak":"Âl-i İmrân Suresi, 22. Ayet","not":"Ayette çoğul \"نَّاصِرِينَ\" (nâsırîn) şeklinde geçer; kök ve vezin aynıdır."}},{"ar":"مَنْصُورٌ","tr":"yardım olunan","isim":"İsm-i Mef'ûl","kategori":"isim","vezin":"مَفْعُولٌ","aciklama":"İş kendisine yapılanı bildiren sıfattır; \"yapılan / edilen\" anlamı taşır.","ornek":{"tip":"ayet","ar_once":"فَلَا يُسْرِف فِّي الْقَتْلِ ۖ إِنَّهُ كَانَ ","ar_vurgu":"مَنصُورًا","ar_sonra":"","tr":"Öldürmede ölçüyü aşmasın; çünkü o (kısas hakkı olan) zaten yardım görmüştür.","kaynak":"İsrâ Suresi, 33. Ayet","not":null}},{"ar":"لَمْ يَنْصُرْ","tr":"yardım etmedi","isim":"Cahd-ı Mutlak","kategori":"fiil","vezin":"لَمْ يَفْعُلْ","aciklama":"Geçmişte hiç gerçekleşmemiş bir işi, \"لَمْ\" ile kesin olarak olumsuzlar.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَمْ يَنصُرْهُ","ar_sonra":" أَحَدٌ عِندَ الشِّدَّةِ","tr":"Zorluk anında ona kimse yardım etmedi.","kaynak":null,"not":null}},{"ar":"لَمَّا يَنْصُرْ","tr":"henüz yardım etmedi","isim":"Cahd-ı Müstağrak","kategori":"fiil","vezin":"لَمَّا يَفْعُلْ","aciklama":"Geçmişten şimdiye kadar hâlâ gerçekleşmemiş bir işi, \"لَمَّا\" ile bildirir; \"henüz\" anlamı taşır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَمَّا يَنصُرْهُ","ar_sonra":" صَدِيقُهُ بَعْدُ","tr":"Arkadaşı ona henüz yardım etmedi.","kaynak":null,"not":null}},{"ar":"مَا يَنْصُرُ","tr":"yardım etmiyor","isim":"Nefy-i Hâl","kategori":"fiil","vezin":"مَا يَفْعُلُ","aciklama":"Şu anda yapılmayan bir işi, \"مَا\" ile olumsuzlar.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"مَا يَنصُرُ","ar_sonra":" الظَّالِمَ أَحَدٌ","tr":"Zalime kimse yardım etmiyor.","kaynak":null,"not":null}},{"ar":"لَا يَنْصُرُ","tr":"yardım etmez","isim":"Nefy-i İstikbal","kategori":"fiil","vezin":"لَا يَفْعُلُ","aciklama":"Gelecekte yapılmayacak bir işi, \"لَا\" ile olumsuzlar.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَا يَنصُرُ","ar_sonra":" الْكَذِبُ صَاحِبَهُ","tr":"Yalan, sahibine yardımcı olmaz.","kaynak":null,"not":null}},{"ar":"لَنْ يَنْصُرَ","tr":"asla yardım etmez","isim":"Tekîd-i Nefy-i İstikbâl","kategori":"fiil","vezin":"لَنْ يَفْعَلَ","aciklama":"Gelecekte kesinlikle yapılmayacağını, \"لَنْ\" ile vurgulu şekilde bildirir.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَن يَنصُرَ","ar_sonra":" الْبَاطِلَ أَحَدٌ فِي النِّهَايَةِ","tr":"Sonunda hiç kimse batıla yardım etmeyecektir.","kaynak":null,"not":null}},{"ar":"لِيَنْصُرْ","tr":"yardım etsin","isim":"Emr-i Gâib","kategori":"fiil","vezin":"لِيَفْعُلْ","aciklama":"Gaib (o / onlar) için \"لِـ\" ile kurulan emir kalıbıdır; \"yapsın\" anlamı taşır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لِيَنصُرِ","ar_sonra":" الْقَوِيُّ الضَّعِيفَ","tr":"Güçlü olan, zayıfa yardım etsin.","kaynak":null,"not":null}},{"ar":"لَا يَنْصُرْ","tr":"yardım etmesin","isim":"Nehy-i Gâib","kategori":"fiil","vezin":"لَا يَفْعُلْ","aciklama":"Gaib için \"لَا\" ile kurulan yasaklama kalıbıdır; \"yapmasın\" anlamı taşır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَا يَنصُرِ","ar_sonra":" الظَّالِمَ أَحَدٌ مِنكُمْ","tr":"Sizden hiç kimse zalime yardım etmesin.","kaynak":null,"not":null}},{"ar":"اُنْصُرْ","tr":"yardım et","isim":"Emr-i Hâzır","kategori":"fiil","vezin":"اُفْعُلْ","aciklama":"Muhatap (karşıdaki kişi) için doğrudan emir kalıbıdır; \"yap\" anlamı taşır.","ornek":{"tip":"ayet","ar_once":"رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا وَثَبِّتْ أَقْدَامَنَا ","ar_vurgu":"وَانصُرْنَا","ar_sonra":" عَلَى الْقَوْمِ الْكَافِرِينَ","tr":"Rabbimiz! Üzerimize sabır yağdır, ayaklarımızı sabit kıl ve kâfirler topluluğuna karşı bize yardım et.","kaynak":"Bakara Suresi, 250. Ayet","not":"Ayette nesne eki alarak \"وَانصُرْنَا\" (bize yardım et) şeklinde geçer."}},{"ar":"لَا تَنْصُرْ","tr":"yardım etme","isim":"Nehy-i Hâzır","kategori":"fiil","vezin":"لَا تَفْعُلْ","aciklama":"Muhatabı bir işten \"لَا\" ile men eden yasaklama kalıbıdır; \"yapma\" anlamı taşır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَا تَنصُرِ","ar_sonra":" الظَّالِمَ عَلَى ظُلْمِهِ","tr":"Zalime, zulmünde yardım etme.","kaynak":null,"not":null}},{"ar":"مَنْصَرٌ","tr":"yardım edecek zaman / mekân; yardım etmek","isim":"İsm-i Zaman, İsm-i Mekân, Mastar-ı Mîmî","kategori":"isim","vezin":"مَفْعَلٌ","aciklama":"İşin yapıldığı zamanı veya yeri bildirir; başında mim harfi bulunan masdar da aynı vezindedir.","ornek":{"tip":"cumle","ar_once":"كَانَ ","ar_vurgu":"مَنصَرُ","ar_sonra":" الْجَيْشِ عِندَ الْجَبَلِ","tr":"Ordunun yardım/zafer yeri dağın yanındaydı.","kaynak":null,"not":null}},{"ar":"مِنْصَرٌ","tr":"yardım edecek alet","isim":"İsm-i Âlet","kategori":"isim","vezin":"مِفْعَلٌ","aciklama":"İşin yapılmasında kullanılan aracı/aleti bildirir.","ornek":{"tip":"cumle","ar_once":"كَانَ ذَٰلِكَ الْكِتَابُ ","ar_vurgu":"مِنصَرَهُ","ar_sonra":" فِي أَوْقَاتِ الضَّعْفِ","tr":"O kitap, zayıflık anlarında onun yardımcı aracıydı.","kaynak":null,"not":null}},{"ar":"نَصْرَةٌ","tr":"bir kere yardım etmek","isim":"Mastar-ı Binâi Merre","kategori":"isim","vezin":"فَعْلَةٌ","aciklama":"İşin bir defa yapıldığını bildiren masdar şeklidir.","ornek":{"tip":"cumle","ar_once":"قَدَّمَ لَهُ ","ar_vurgu":"نَصْرَةً","ar_sonra":" وَاحِدَةً ثُمَّ تَرَكَهُ","tr":"Ona bir kez yardım etti, sonra onu bıraktı.","kaynak":null,"not":null}},{"ar":"نِصْرَةٌ","tr":"bir çeşit yardım etmek","isim":"Mastar-ı Binâi Nev'","kategori":"isim","vezin":"فِعْلَةٌ","aciklama":"İşin yapılış biçimini/çeşidini bildiren masdar şeklidir.","ornek":{"tip":"cumle","ar_once":"كَانَتْ تِلْكَ ","ar_vurgu":"نِصْرَةً","ar_sonra":" خَاصَّةً مِن نَّوْعِهَا","tr":"Bu, kendine özgü bir tür yardımdı.","kaynak":null,"not":null}},{"ar":"نُصَيْرٌ","tr":"az yardım etmek","isim":"İsm-i Tasğîr","kategori":"isim","vezin":"فُعَيْلٌ","aciklama":"İsmi; küçültme, azlık veya sevgi ifadesiyle bildiren küçültme (tasgir) kalıbıdır.","ornek":{"tip":"cumle","ar_once":"قَدَّمَ الطِّفْلُ ","ar_vurgu":"نُصَيْرًا","ar_sonra":" صَغِيرًا لِأَبِيهِ","tr":"Çocuk, babasına küçük bir yardımda bulundu.","kaynak":null,"not":null}},{"ar":"نَصْرِيٌّ","tr":"yardım etmeye mensup","isim":"İsm-i Mensûb","kategori":"isim","vezin":"فَعْلِيٌّ","aciklama":"Bir şeye aidiyeti/mensubiyeti bildirir; sonuna nispet yâ'sı (ي) eklenerek yapılır.","ornek":{"tip":"cumle","ar_once":"هَٰذَا مَشْرُوعٌ ","ar_vurgu":"نَصْرِيٌّ","ar_sonra":" يَخْدُمُ الْمُحْتَاجِينَ","tr":"Bu, muhtaçlara hizmet eden bir yardım projesidir.","kaynak":null,"not":null}},{"ar":"نَصَّارٌ","tr":"çok yardım eden","isim":"Mübalağalı İsm-i Fâil","kategori":"isim","vezin":"فَعَّالٌ","aciklama":"İşi çokça/alışkanlık hâlinde yapanı bildiren abartı (mübalağa) kalıbıdır.","ornek":{"tip":"cumle","ar_once":"كَانَ ذَٰلِكَ الرَّجُلُ ","ar_vurgu":"نَصَّارًا","ar_sonra":" لِلْفُقَرَاءِ فِي بَلَدِهِ","tr":"O adam, memleketindeki fakirlere çokça yardım eden biriydi.","kaynak":null,"not":null}},{"ar":"أَنْصَرُ","tr":"daha çok yardım eden","isim":"İsm-i Tafdîl","kategori":"isim","vezin":"أَفْعَلُ","aciklama":"İki şey arasında üstünlük/karşılaştırma bildirir; \"daha... / en...\" anlamı taşır.","ornek":{"tip":"cumle","ar_once":"هُوَ ","ar_vurgu":"أَنصَرُ","ar_sonra":" النَّاسِ لِأَصْدِقَائِهِ","tr":"O, arkadaşlarına insanların en çok yardım edenidir.","kaynak":null,"not":null}},{"ar":"مَا أَنْصَرَهُ","tr":"ne acayip yardım etti","isim":"Fiil-i Taaccubî Evvel","kategori":"taaccub","vezin":"مَا أَفْعَلَهُ","aciklama":"\"مَا أَفْعَلَهُ\" kalıbıyla kurulan, bir niteliğe duyulan hayret/şaşkınlığı bildiren kalıptır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"مَا أَنصَرَهُ","ar_sonra":" لِجَارِهِ فِي وَقْتِ الشِّدَّةِ","tr":"Zor zamanda komşusuna ne kadar da çok yardım etti!","kaynak":null,"not":null}},{"ar":"أَنْصِرْ بِهِ","tr":"ne acayip yardım etti","isim":"Fiil-i Taaccubî Sânî","kategori":"taaccub","vezin":"أَفْعِلْ بِهِ","aciklama":"\"أَفْعِلْ بِهِ\" kalıbıyla kurulan, birinci ta'accüb kalıbıyla aynı anlamı taşıyan ikinci hayret/şaşkınlık kalıbıdır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"أَنصِرْ بِالْمُعَلِّمِ","ar_sonra":" لِطُلَّابِهِ","tr":"Öğretmenin öğrencilerine yardımı ne kadar da çoktur!","kaynak":null,"not":null}}];
+const SIGALAR = [{"ar":"نَصَرَ","tr":"yardım etti","isim":"Fiil-i Mâzî","kategori":"fiil","vezin":"فَعَلَ","aciklama":"Geçmişte, kesin olarak gerçekleşmiş bir işi bildirir.","ornek":{"tip":"ayet","ar_once":"لَقَدْ ","ar_vurgu":"نَصَرَكُمُ","ar_sonra":" اللَّهُ فِي مَوَاطِنَ كَثِيرَةٍ","tr":"Andolsun, Allah birçok yerde size yardım etmiştir.","kaynak":"Tevbe Suresi, 25. Ayet","not":null}},{"ar":"يَنْصُرُ","tr":"yardım eder / ediyor","isim":"Fiil-i Muzâri'","kategori":"fiil","vezin":"يَفْعُلُ","aciklama":"Şimdiki veya gelecek zamanda yapılan/yapılacak bir işi bildirir.","ornek":{"tip":"ayet","ar_once":"إِن ","ar_vurgu":"يَنصُرْكُمُ","ar_sonra":" اللَّهُ فَلَا غَالِبَ لَكُمْ","tr":"Allah size yardım ederse, artık sizi yenecek yoktur.","kaynak":"Âl-i İmrân Suresi, 160. Ayet","not":"Ayette nesne eki alarak \"يَنصُرْكُمُ\" (size yardım eder) şeklinde geçer."}},{"ar":"نَصْرًا","tr":"yardım etmek","isim":"Mastar Gayr-i Mîmî","kategori":"isim","vezin":"فَعْلًا","aciklama":"Fiilin, zaman kavramı taşımayan iş adını; başında mim harfi olmayan asıl masdar şeklini bildirir.","ornek":{"tip":"ayet","ar_once":"وَيَنصُرَكَ اللَّهُ ","ar_vurgu":"نَصْرًا","ar_sonra":" عَزِيزًا","tr":"Ve Allah sana şanlı bir zaferle yardım etsin diye.","kaynak":"Fetih Suresi, 3. Ayet","not":null}},{"ar":"نَاصِرٌ","tr":"yardım eden","isim":"İsm-i Fâil","kategori":"isim","vezin":"فَاعِلٌ","aciklama":"İşi yapanı bildiren sıfattır; \"yapan / eden\" anlamı taşır.","ornek":{"tip":"ayet","ar_once":"أُولَٰئِكَ الَّذِينَ حَبِطَتْ أَعْمَالُهُمْ فِي الدُّنْيَا وَالْآخِرَةِ وَمَا لَهُم مِّن ","ar_vurgu":"نَّاصِرِينَ","ar_sonra":"","tr":"Onların dünyada ve ahirette amelleri boşa gitmiştir; onların hiçbir yardımcısı da yoktur.","kaynak":"Âl-i İmrân Suresi, 22. Ayet","not":"Ayette çoğul \"نَّاصِرِينَ\" (nâsırîn) şeklinde geçer; kök ve vezin aynıdır."}},{"ar":"مَنْصُورٌ","tr":"yardım olunan","isim":"İsm-i Mef'ûl","kategori":"isim","vezin":"مَفْعُولٌ","aciklama":"İş kendisine yapılanı bildiren sıfattır; \"yapılan / edilen\" anlamı taşır.","ornek":{"tip":"ayet","ar_once":"فَلَا يُسْرِف فِّي الْقَتْلِ ۖ إِنَّهُ كَانَ ","ar_vurgu":"مَنصُورًا","ar_sonra":"","tr":"Öldürmede ölçüyü aşmasın; çünkü o (kısas hakkı olan) zaten yardım görmüştür.","kaynak":"İsrâ Suresi, 33. Ayet","not":null}},{"ar":"لَمْ يَنْصُرْ","tr":"yardım etmedi","isim":"Cahd-ı Mutlak","kategori":"fiil","vezin":"لَمْ يَفْعُلْ","aciklama":"Geçmişte hiç gerçekleşmemiş bir işi, \"لَمْ\" ile kesin olarak olumsuzlar.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَمْ يَنصُرْهُ","ar_sonra":" أَحَدٌ عِندَ الشِّدَّةِ","tr":"Zorluk anında ona kimse yardım etmedi.","kaynak":null,"not":null}},{"ar":"لَمَّا يَنْصُرْ","tr":"henüz yardım etmedi","isim":"Cahd-ı Müstağrak","kategori":"fiil","vezin":"لَمَّا يَفْعُلْ","aciklama":"Geçmişten şimdiye kadar hâlâ gerçekleşmemiş bir işi, \"لَمَّا\" ile bildirir; \"henüz\" anlamı taşır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَمَّا يَنصُرْهُ","ar_sonra":" صَدِيقُهُ بَعْدُ","tr":"Arkadaşı ona henüz yardım etmedi.","kaynak":null,"not":null}},{"ar":"مَا يَنْصُرُ","tr":"yardım etmiyor","isim":"Nefy-i Hâl","kategori":"fiil","vezin":"مَا يَفْعُلُ","aciklama":"Şu anda yapılmayan bir işi, \"مَا\" ile olumsuzlar.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"مَا يَنصُرُ","ar_sonra":" الظَّالِمَ أَحَدٌ","tr":"Zalime kimse yardım etmiyor.","kaynak":null,"not":null}},{"ar":"لَا يَنْصُرُ","tr":"yardım etmez","isim":"Nefy-i İstikbal","kategori":"fiil","vezin":"لَا يَفْعُلُ","aciklama":"Gelecekte yapılmayacak bir işi, \"لَا\" ile olumsuzlar.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَا يَنصُرُ","ar_sonra":" الْكَذِبُ صَاحِبَهُ","tr":"Yalan, sahibine yardımcı olmaz.","kaynak":null,"not":null}},{"ar":"لَنْ يَنْصُرَ","tr":"asla yardım etmez","isim":"Tekîd-i Nefy-i İstikbâl","kategori":"fiil","vezin":"لَنْ يَفْعُلَ","aciklama":"Gelecekte kesinlikle yapılmayacağını, \"لَنْ\" ile vurgulu şekilde bildirir.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَن يَنصُرَ","ar_sonra":" الْبَاطِلَ أَحَدٌ فِي النِّهَايَةِ","tr":"Sonunda hiç kimse batıla yardım etmeyecektir.","kaynak":null,"not":null}},{"ar":"لِيَنْصُرْ","tr":"yardım etsin","isim":"Emr-i Gâib","kategori":"fiil","vezin":"لِيَفْعُلْ","aciklama":"Gaib (o / onlar) için \"لِـ\" ile kurulan emir kalıbıdır; \"yapsın\" anlamı taşır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لِيَنصُرِ","ar_sonra":" الْقَوِيُّ الضَّعِيفَ","tr":"Güçlü olan, zayıfa yardım etsin.","kaynak":null,"not":null}},{"ar":"لَا يَنْصُرْ","tr":"yardım etmesin","isim":"Nehy-i Gâib","kategori":"fiil","vezin":"لَا يَفْعُلْ","aciklama":"Gaib için \"لَا\" ile kurulan yasaklama kalıbıdır; \"yapmasın\" anlamı taşır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَا يَنصُرِ","ar_sonra":" الظَّالِمَ أَحَدٌ مِنكُمْ","tr":"Sizden hiç kimse zalime yardım etmesin.","kaynak":null,"not":null}},{"ar":"اُنْصُرْ","tr":"yardım et","isim":"Emr-i Hâzır","kategori":"fiil","vezin":"اُفْعُلْ","aciklama":"Muhatap (karşıdaki kişi) için doğrudan emir kalıbıdır; \"yap\" anlamı taşır.","ornek":{"tip":"ayet","ar_once":"رَبَّنَا أَفْرِغْ عَلَيْنَا صَبْرًا وَثَبِّتْ أَقْدَامَنَا ","ar_vurgu":"وَانصُرْنَا","ar_sonra":" عَلَى الْقَوْمِ الْكَافِرِينَ","tr":"Rabbimiz! Üzerimize sabır yağdır, ayaklarımızı sabit kıl ve kâfirler topluluğuna karşı bize yardım et.","kaynak":"Bakara Suresi, 250. Ayet","not":"Ayette nesne eki alarak \"وَانصُرْنَا\" (bize yardım et) şeklinde geçer."}},{"ar":"لَا تَنْصُرْ","tr":"yardım etme","isim":"Nehy-i Hâzır","kategori":"fiil","vezin":"لَا تَفْعُلْ","aciklama":"Muhatabı bir işten \"لَا\" ile men eden yasaklama kalıbıdır; \"yapma\" anlamı taşır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"لَا تَنصُرِ","ar_sonra":" الظَّالِمَ عَلَى ظُلْمِهِ","tr":"Zalime, zulmünde yardım etme.","kaynak":null,"not":null}},{"ar":"مَنْصَرٌ","tr":"yardım edecek zaman / mekân; yardım etmek","isim":"İsm-i Zaman, İsm-i Mekân, Mastar-ı Mîmî","kategori":"isim","vezin":"مَفْعَلٌ","aciklama":"İşin yapıldığı zamanı veya yeri bildirir; başında mim harfi bulunan masdar da aynı vezindedir.","ornek":{"tip":"cumle","ar_once":"كَانَ ","ar_vurgu":"مَنصَرُ","ar_sonra":" الْجَيْشِ عِندَ الْجَبَلِ","tr":"Ordunun yardım/zafer yeri dağın yanındaydı.","kaynak":null,"not":null}},{"ar":"مِنْصَرٌ","tr":"yardım edecek alet","isim":"İsm-i Âlet","kategori":"isim","vezin":"مِفْعَلٌ","aciklama":"İşin yapılmasında kullanılan aracı/aleti bildirir.","ornek":{"tip":"cumle","ar_once":"كَانَ ذَٰلِكَ الْكِتَابُ ","ar_vurgu":"مِنصَرَهُ","ar_sonra":" فِي أَوْقَاتِ الضَّعْفِ","tr":"O kitap, zayıflık anlarında onun yardımcı aracıydı.","kaynak":null,"not":null}},{"ar":"نَصْرَةٌ","tr":"bir kere yardım etmek","isim":"Mastar-ı Binâi Merre","kategori":"isim","vezin":"فَعْلَةٌ","aciklama":"İşin bir defa yapıldığını bildiren masdar şeklidir.","ornek":{"tip":"cumle","ar_once":"قَدَّمَ لَهُ ","ar_vurgu":"نَصْرَةً","ar_sonra":" وَاحِدَةً ثُمَّ تَرَكَهُ","tr":"Ona bir kez yardım etti, sonra onu bıraktı.","kaynak":null,"not":null}},{"ar":"نِصْرَةٌ","tr":"bir çeşit yardım etmek","isim":"Mastar-ı Binâi Nev'","kategori":"isim","vezin":"فِعْلَةٌ","aciklama":"İşin yapılış biçimini/çeşidini bildiren masdar şeklidir.","ornek":{"tip":"cumle","ar_once":"كَانَتْ تِلْكَ ","ar_vurgu":"نِصْرَةً","ar_sonra":" خَاصَّةً مِن نَّوْعِهَا","tr":"Bu, kendine özgü bir tür yardımdı.","kaynak":null,"not":null}},{"ar":"نُصَيْرٌ","tr":"az yardım etmek","isim":"İsm-i Tasğîr","kategori":"isim","vezin":"فُعَيْلٌ","aciklama":"İsmi; küçültme, azlık veya sevgi ifadesiyle bildiren küçültme (tasgir) kalıbıdır.","ornek":{"tip":"cumle","ar_once":"قَدَّمَ الطِّفْلُ ","ar_vurgu":"نُصَيْرًا","ar_sonra":" صَغِيرًا لِأَبِيهِ","tr":"Çocuk, babasına küçük bir yardımda bulundu.","kaynak":null,"not":null}},{"ar":"نَصْرِيٌّ","tr":"yardım etmeye mensup","isim":"İsm-i Mensûb","kategori":"isim","vezin":"فَعْلِيٌّ","aciklama":"Bir şeye aidiyeti/mensubiyeti bildirir; sonuna nispet yâ'sı (ي) eklenerek yapılır.","ornek":{"tip":"cumle","ar_once":"هَٰذَا مَشْرُوعٌ ","ar_vurgu":"نَصْرِيٌّ","ar_sonra":" يَخْدُمُ الْمُحْتَاجِينَ","tr":"Bu, muhtaçlara hizmet eden bir yardım projesidir.","kaynak":null,"not":null}},{"ar":"نَصَّارٌ","tr":"çok yardım eden","isim":"Mübalağalı İsm-i Fâil","kategori":"isim","vezin":"فَعَّالٌ","aciklama":"İşi çokça/alışkanlık hâlinde yapanı bildiren abartı (mübalağa) kalıbıdır.","ornek":{"tip":"cumle","ar_once":"كَانَ ذَٰلِكَ الرَّجُلُ ","ar_vurgu":"نَصَّارًا","ar_sonra":" لِلْفُقَرَاءِ فِي بَلَدِهِ","tr":"O adam, memleketindeki fakirlere çokça yardım eden biriydi.","kaynak":null,"not":null}},{"ar":"أَنْصَرُ","tr":"daha çok yardım eden","isim":"İsm-i Tafdîl","kategori":"isim","vezin":"أَفْعَلُ","aciklama":"İki şey arasında üstünlük/karşılaştırma bildirir; \"daha... / en...\" anlamı taşır.","ornek":{"tip":"cumle","ar_once":"هُوَ ","ar_vurgu":"أَنصَرُ","ar_sonra":" النَّاسِ لِأَصْدِقَائِهِ","tr":"O, arkadaşlarına insanların en çok yardım edenidir.","kaynak":null,"not":null}},{"ar":"مَا أَنْصَرَهُ","tr":"ne acayip yardım etti","isim":"Fiil-i Taaccubî Evvel","kategori":"taaccub","vezin":"مَا أَفْعَلَهُ","aciklama":"\"مَا أَفْعَلَهُ\" kalıbıyla kurulan, bir niteliğe duyulan hayret/şaşkınlığı bildiren kalıptır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"مَا أَنصَرَهُ","ar_sonra":" لِجَارِهِ فِي وَقْتِ الشِّدَّةِ","tr":"Zor zamanda komşusuna ne kadar da çok yardım etti!","kaynak":null,"not":null}},{"ar":"أَنْصِرْ بِهِ","tr":"ne acayip yardım etti","isim":"Fiil-i Taaccubî Sânî","kategori":"taaccub","vezin":"أَفْعِلْ بِهِ","aciklama":"\"أَفْعِلْ بِهِ\" kalıbıyla kurulan, birinci ta'accüb kalıbıyla aynı anlamı taşıyan ikinci hayret/şaşkınlık kalıbıdır.","ornek":{"tip":"cumle","ar_once":"","ar_vurgu":"أَنصِرْ بِالْمُعَلِّمِ","ar_sonra":" لِطُلَّابِهِ","tr":"Öğretmenin öğrencilerine yardımı ne kadar da çoktur!","kaynak":null,"not":null}}];
+
+const FARKLI_FIILLER = [{"harfler":["ع","ب","د"],"ozet":"ibadet etti","tr24":["ibadet etti","ibadet eder / ediyor","ibadet etmek","ibadet eden","ibadet edilen","ibadet etmedi","henüz ibadet etmedi","ibadet etmiyor","ibadet etmez","asla ibadet etmez","ibadet etsin","ibadet etmesin","ibadet et","ibadet etme","ibadet edecek zaman / mekân; ibadet etmek","ibadet edecek alet","bir kere ibadet etmek","bir çeşit ibadet etmek","az ibadet etmek","ibadet etmeye mensup","çok ibadet eden","daha çok ibadet eden","ne acayip ibadet etti","ne acayip ibadet etti"],"ar24":["عَبَدَ","يَعْبُدُ","عَبْدًا","عَابِدٌ","مَعْبُودٌ","لَمْ يَعْبُدْ","لَمَّا يَعْبُدْ","مَا يَعْبُدُ","لَا يَعْبُدُ","لَنْ يَعْبُدَ","لِيَعْبُدْ","لَا يَعْبُدْ","اُعْبُدْ","لَا تَعْبُدْ","مَعْبَدٌ","مِعْبَدٌ","عَبْدَةٌ","عِبْدَةٌ","عُبَيْدٌ","عَبْدِيٌّ","عَبَّادٌ","أَعْبَدُ","مَا أَعْبَدَهُ","أَعْبِدْ بِهِ"]},{"harfler":["س","ج","د"],"ozet":"secde etti","tr24":["secde etti","secde eder / ediyor","secde etmek","secde eden","secde edilen","secde etmedi","henüz secde etmedi","secde etmiyor","secde etmez","asla secde etmez","secde etsin","secde etmesin","secde et","secde etme","secde edecek zaman / mekân; secde etmek","secde edecek alet","bir kere secde etmek","bir çeşit secde etmek","az secde etmek","secde etmeye mensup","çok secde eden","daha çok secde eden","ne acayip secde etti","ne acayip secde etti"],"ar24":["سَجَدَ","يَسْجُدُ","سَجْدًا","سَاجِدٌ","مَسْجُودٌ","لَمْ يَسْجُدْ","لَمَّا يَسْجُدْ","مَا يَسْجُدُ","لَا يَسْجُدُ","لَنْ يَسْجُدَ","لِيَسْجُدْ","لَا يَسْجُدْ","اُسْجُدْ","لَا تَسْجُدْ","مَسْجَدٌ","مِسْجَدٌ","سَجْدَةٌ","سِجْدَةٌ","سُجَيْدٌ","سَجْدِيٌّ","سَجَّادٌ","أَسْجَدُ","مَا أَسْجَدَهُ","أَسْجِدْ بِهِ"]},{"harfler":["ط","ل","ب"],"ozet":"talep etti","tr24":["talep etti","talep eder / ediyor","talep etmek","talep eden","talep edilen","talep etmedi","henüz talep etmedi","talep etmiyor","talep etmez","asla talep etmez","talep etsin","talep etmesin","talep et","talep etme","talep edecek zaman / mekân; talep etmek","talep edecek alet","bir kere talep etmek","bir çeşit talep etmek","az talep etmek","talep etmeye mensup","çok talep eden","daha çok talep eden","ne acayip talep etti","ne acayip talep etti"],"ar24":["طَلَبَ","يَطْلُبُ","طَلْبًا","طَالِبٌ","مَطْلُوبٌ","لَمْ يَطْلُبْ","لَمَّا يَطْلُبْ","مَا يَطْلُبُ","لَا يَطْلُبُ","لَنْ يَطْلُبَ","لِيَطْلُبْ","لَا يَطْلُبْ","اُطْلُبْ","لَا تَطْلُبْ","مَطْلَبٌ","مِطْلَبٌ","طَلْبَةٌ","طِلْبَةٌ","طُلَيْبٌ","طَلْبِيٌّ","طَلَّابٌ","أَطْلَبُ","مَا أَطْلَبَهُ","أَطْلِبْ بِهِ"]},{"harfler":["ن","ق","ل"],"ozet":"nakletti","tr24":["nakil etti","nakil eder / ediyor","nakil etmek","nakil eden","nakil edilen","nakil etmedi","henüz nakil etmedi","nakil etmiyor","nakil etmez","asla nakil etmez","nakil etsin","nakil etmesin","nakil et","nakil etme","nakil edecek zaman / mekân; nakil etmek","nakil edecek alet","bir kere nakil etmek","bir çeşit nakil etmek","az nakil etmek","nakil etmeye mensup","çok nakil eden","daha çok nakil eden","ne acayip nakil etti","ne acayip nakil etti"],"ar24":["نَقَلَ","يَنْقُلُ","نَقْلًا","نَاقِلٌ","مَنْقُولٌ","لَمْ يَنْقُلْ","لَمَّا يَنْقُلْ","مَا يَنْقُلُ","لَا يَنْقُلُ","لَنْ يَنْقُلَ","لِيَنْقُلْ","لَا يَنْقُلْ","اُنْقُلْ","لَا تَنْقُلْ","مَنْقَلٌ","مِنْقَلٌ","نَقْلَةٌ","نِقْلَةٌ","نُقَيْلٌ","نَقْلِيٌّ","نَقَّالٌ","أَنْقَلُ","مَا أَنْقَلَهُ","أَنْقِلْ بِهِ"]},{"harfler":["ح","ش","ر"],"ozet":"haşretti","tr24":["haşir etti","haşir eder / ediyor","haşir etmek","haşir eden","haşir edilen","haşir etmedi","henüz haşir etmedi","haşir etmiyor","haşir etmez","asla haşir etmez","haşir etsin","haşir etmesin","haşir et","haşir etme","haşir edecek zaman / mekân; haşir etmek","haşir edecek alet","bir kere haşir etmek","bir çeşit haşir etmek","az haşir etmek","haşir etmeye mensup","çok haşir eden","daha çok haşir eden","ne acayip haşir etti","ne acayip haşir etti"],"ar24":["حَشَرَ","يَحْشُرُ","حَشْرًا","حَاشِرٌ","مَحْشُورٌ","لَمْ يَحْشُرْ","لَمَّا يَحْشُرْ","مَا يَحْشُرُ","لَا يَحْشُرُ","لَنْ يَحْشُرَ","لِيَحْشُرْ","لَا يَحْشُرْ","اُحْشُرْ","لَا تَحْشُرْ","مَحْشَرٌ","مِحْشَرٌ","حَشْرَةٌ","حِشْرَةٌ","حُشَيْرٌ","حَشْرِيٌّ","حَشَّارٌ","أَحْشَرُ","مَا أَحْشَرَهُ","أَحْشِرْ بِهِ"]},{"harfler":["ش","ك","ر"],"ozet":"şükretti","tr24":["şükür etti","şükür eder / ediyor","şükür etmek","şükür eden","şükür edilen","şükür etmedi","henüz şükür etmedi","şükür etmiyor","şükür etmez","asla şükür etmez","şükür etsin","şükür etmesin","şükür et","şükür etme","şükür edecek zaman / mekân; şükür etmek","şükür edecek alet","bir kere şükür etmek","bir çeşit şükür etmek","az şükür etmek","şükür etmeye mensup","çok şükür eden","daha çok şükür eden","ne acayip şükür etti","ne acayip şükür etti"],"ar24":["شَكَرَ","يَشْكُرُ","شَكْرًا","شَاكِرٌ","مَشْكُورٌ","لَمْ يَشْكُرْ","لَمَّا يَشْكُرْ","مَا يَشْكُرُ","لَا يَشْكُرُ","لَنْ يَشْكُرَ","لِيَشْكُرْ","لَا يَشْكُرْ","اُشْكُرْ","لَا تَشْكُرْ","مَشْكَرٌ","مِشْكَرٌ","شَكْرَةٌ","شِكْرَةٌ","شُكَيْرٌ","شَكْرِيٌّ","شَكَّارٌ","أَشْكَرُ","مَا أَشْكَرَهُ","أَشْكِرْ بِهِ"]},{"harfler":["ق","ت","ل"],"ozet":"öldürdü","tr24":["öldürdü","öldürür / öldürüyor","öldürmek","öldüren","öldürülen","öldürmedi","henüz öldürmedi","öldürmüyor","öldürmez","asla öldürmez","öldürsün","öldürmesin","öldür","öldürme","öldürecek zaman / mekân; öldürmek","öldürecek alet","bir kere öldürmek","bir çeşit öldürmek","az öldürmek","öldürmeye mensup","çok öldüren","daha çok öldüren","ne acayip öldürdü","ne acayip öldürdü"],"ar24":["قَتَلَ","يَقْتُلُ","قَتْلًا","قَاتِلٌ","مَقْتُولٌ","لَمْ يَقْتُلْ","لَمَّا يَقْتُلْ","مَا يَقْتُلُ","لَا يَقْتُلُ","لَنْ يَقْتُلَ","لِيَقْتُلْ","لَا يَقْتُلْ","اُقْتُلْ","لَا تَقْتُلْ","مَقْتَلٌ","مِقْتَلٌ","قَتْلَةٌ","قِتْلَةٌ","قُتَيْلٌ","قَتْلِيٌّ","قَتَّالٌ","أَقْتَلُ","مَا أَقْتَلَهُ","أَقْتِلْ بِهِ"]},{"harfler":["ك","ت","ب"],"ozet":"yazdı","tr24":["yazdı","yazar / yazıyor","yazmak","yazan","yazılan","yazmadı","henüz yazmadı","yazmıyor","yazmaz","asla yazmaz","yazsın","yazmasın","yaz","yazma","yazacak zaman / mekân; yazmak","yazacak alet","bir kere yazmak","bir çeşit yazmak","az yazmak","yazmaya mensup","çok yazan","daha çok yazan","ne acayip yazdı","ne acayip yazdı"],"ar24":["كَتَبَ","يَكْتُبُ","كَتْبًا","كَاتِبٌ","مَكْتُوبٌ","لَمْ يَكْتُبْ","لَمَّا يَكْتُبْ","مَا يَكْتُبُ","لَا يَكْتُبُ","لَنْ يَكْتُبَ","لِيَكْتُبْ","لَا يَكْتُبْ","اُكْتُبْ","لَا تَكْتُبْ","مَكْتَبٌ","مِكْتَبٌ","كَتْبَةٌ","كِتْبَةٌ","كُتَيْبٌ","كَتْبِيٌّ","كَتَّابٌ","أَكْتَبُ","مَا أَكْتَبَهُ","أَكْتِبْ بِهِ"]},{"harfler":["ن","ظ","ر"],"ozet":"baktı","tr24":["baktı","bakar / bakıyor","bakmak","bakan","bakılan","bakmadı","henüz bakmadı","bakmıyor","bakmaz","asla bakmaz","baksın","bakmasın","bak","bakma","bakacak zaman / mekân; bakmak","bakacak alet","bir kere bakmak","bir çeşit bakmak","az bakmak","bakmaya mensup","çok bakan","daha çok bakan","ne acayip baktı","ne acayip baktı"],"ar24":["نَظَرَ","يَنْظُرُ","نَظْرًا","نَاظِرٌ","مَنْظُورٌ","لَمْ يَنْظُرْ","لَمَّا يَنْظُرْ","مَا يَنْظُرُ","لَا يَنْظُرُ","لَنْ يَنْظُرَ","لِيَنْظُرْ","لَا يَنْظُرْ","اُنْظُرْ","لَا تَنْظُرْ","مَنْظَرٌ","مِنْظَرٌ","نَظْرَةٌ","نِظْرَةٌ","نُظَيْرٌ","نَظْرِيٌّ","نَظَّارٌ","أَنْظَرُ","مَا أَنْظَرَهُ","أَنْظِرْ بِهِ"]},{"harfler":["د","خ","ل"],"ozet":"girdi","tr24":["girdi","girer / giriyor","girmek","giren","girilen","girmedi","henüz girmedi","girmiyor","girmez","asla girmez","girsin","girmesin","gir","girme","girecek zaman / mekân; girmek","girecek alet","bir kere girmek","bir çeşit girmek","az girmek","girmeye mensup","çok giren","daha çok giren","ne acayip girdi","ne acayip girdi"],"ar24":["دَخَلَ","يَدْخُلُ","دَخْلًا","دَاخِلٌ","مَدْخُولٌ","لَمْ يَدْخُلْ","لَمَّا يَدْخُلْ","مَا يَدْخُلُ","لَا يَدْخُلُ","لَنْ يَدْخُلَ","لِيَدْخُلْ","لَا يَدْخُلْ","اُدْخُلْ","لَا تَدْخُلْ","مَدْخَلٌ","مِدْخَلٌ","دَخْلَةٌ","دِخْلَةٌ","دُخَيْلٌ","دَخْلِيٌّ","دَخَّالٌ","أَدْخَلُ","مَا أَدْخَلَهُ","أَدْخِلْ بِهِ"]},{"harfler":["خ","ر","ج"],"ozet":"çıktı","tr24":["çıktı","çıkar / çıkıyor","çıkmak","çıkan","çıkılan","çıkmadı","henüz çıkmadı","çıkmıyor","çıkmaz","asla çıkmaz","çıksın","çıkmasın","çık","çıkma","çıkacak zaman / mekân; çıkmak","çıkacak alet","bir kere çıkmak","bir çeşit çıkmak","az çıkmak","çıkmaya mensup","çok çıkan","daha çok çıkan","ne acayip çıktı","ne acayip çıktı"],"ar24":["خَرَجَ","يَخْرُجُ","خَرْجًا","خَارِجٌ","مَخْرُوجٌ","لَمْ يَخْرُجْ","لَمَّا يَخْرُجْ","مَا يَخْرُجُ","لَا يَخْرُجُ","لَنْ يَخْرُجَ","لِيَخْرُجْ","لَا يَخْرُجْ","اُخْرُجْ","لَا تَخْرُجْ","مَخْرَجٌ","مِخْرَجٌ","خَرْجَةٌ","خِرْجَةٌ","خُرَيْجٌ","خَرْجِيٌّ","خَرَّاجٌ","أَخْرَجُ","مَا أَخْرَجَهُ","أَخْرِجْ بِهِ"]},{"harfler":["ن","ش","ر"],"ozet":"yaydı","tr24":["yaydı","yayar / yayıyor","yaymak","yayan","yayılan","yaymadı","henüz yaymadı","yaymıyor","yaymaz","asla yaymaz","yaysın","yaymasın","yay","yayma","yayacak zaman / mekân; yaymak","yayacak alet","bir kere yaymak","bir çeşit yaymak","az yaymak","yaymaya mensup","çok yayan","daha çok yayan","ne acayip yaydı","ne acayip yaydı"],"ar24":["نَشَرَ","يَنْشُرُ","نَشْرًا","نَاشِرٌ","مَنْشُورٌ","لَمْ يَنْشُرْ","لَمَّا يَنْشُرْ","مَا يَنْشُرُ","لَا يَنْشُرُ","لَنْ يَنْشُرَ","لِيَنْشُرْ","لَا يَنْشُرْ","اُنْشُرْ","لَا تَنْشُرْ","مَنْشَرٌ","مِنْشَرٌ","نَشْرَةٌ","نِشْرَةٌ","نُشَيْرٌ","نَشْرِيٌّ","نَشَّارٌ","أَنْشَرُ","مَا أَنْشَرَهُ","أَنْشِرْ بِهِ"]},{"harfler":["ط","ر","د"],"ozet":"kovdu","tr24":["kovdu","kovar / kovuyor","kovmak","kovan","kovulan","kovmadı","henüz kovmadı","kovmuyor","kovmaz","asla kovmaz","kovsun","kovmasın","kov","kovma","kovacak zaman / mekân; kovmak","kovacak alet","bir kere kovmak","bir çeşit kovmak","az kovmak","kovmaya mensup","çok kovan","daha çok kovan","ne acayip kovdu","ne acayip kovdu"],"ar24":["طَرَدَ","يَطْرُدُ","طَرْدًا","طَارِدٌ","مَطْرُودٌ","لَمْ يَطْرُدْ","لَمَّا يَطْرُدْ","مَا يَطْرُدُ","لَا يَطْرُدُ","لَنْ يَطْرُدَ","لِيَطْرُدْ","لَا يَطْرُدْ","اُطْرُدْ","لَا تَطْرُدْ","مَطْرَدٌ","مِطْرَدٌ","طَرْدَةٌ","طِرْدَةٌ","طُرَيْدٌ","طَرْدِيٌّ","طَرَّادٌ","أَطْرَدُ","مَا أَطْرَدَهُ","أَطْرِدْ بِهِ"]},{"harfler":["س","ر","ق"],"ozet":"çaldı","tr24":["çaldı","çalar / çalıyor","çalmak","çalan","çalınan","çalmadı","henüz çalmadı","çalmıyor","çalmaz","asla çalmaz","çalsın","çalmasın","çal","çalma","çalacak zaman / mekân; çalmak","çalacak alet","bir kere çalmak","bir çeşit çalmak","az çalmak","çalmaya mensup","çok çalan","daha çok çalan","ne acayip çaldı","ne acayip çaldı"],"ar24":["سَرَقَ","يَسْرُقُ","سَرْقًا","سَارِقٌ","مَسْرُوقٌ","لَمْ يَسْرُقْ","لَمَّا يَسْرُقْ","مَا يَسْرُقُ","لَا يَسْرُقُ","لَنْ يَسْرُقَ","لِيَسْرُقْ","لَا يَسْرُقْ","اُسْرُقْ","لَا تَسْرُقْ","مَسْرَقٌ","مِسْرَقٌ","سَرْقَةٌ","سِرْقَةٌ","سُرَيْقٌ","سَرْقِيٌّ","سَرَّاقٌ","أَسْرَقُ","مَا أَسْرَقَهُ","أَسْرِقْ بِهِ"]},{"harfler":["ز","ج","ر"],"ozet":"azarladı","tr24":["azarladı","azarlar / azarlıyor","azarlamak","azarlayan","azarlanan","azarlamadı","henüz azarlamadı","azarlamıyor","azarlamaz","asla azarlamaz","azarlasın","azarlamasın","azarla","azarlama","azarlayacak zaman / mekân; azarlamak","azarlayacak alet","bir kere azarlamak","bir çeşit azarlamak","az azarlamak","azarlamaya mensup","çok azarlayan","daha çok azarlayan","ne acayip azarladı","ne acayip azarladı"],"ar24":["زَجَرَ","يَزْجُرُ","زَجْرًا","زَاجِرٌ","مَزْجُورٌ","لَمْ يَزْجُرْ","لَمَّا يَزْجُرْ","مَا يَزْجُرُ","لَا يَزْجُرُ","لَنْ يَزْجُرَ","لِيَزْجُرْ","لَا يَزْجُرْ","اُزْجُرْ","لَا تَزْجُرْ","مَزْجَرٌ","مِزْجَرٌ","زَجْرَةٌ","زِجْرَةٌ","زُجَيْرٌ","زَجْرِيٌّ","زَجَّارٌ","أَزْجَرُ","مَا أَزْجَرَهُ","أَزْجِرْ بِهِ"]},{"harfler":["خ","ل","ق"],"ozet":"yarattı","tr24":["yarattı","yaratır / yaratıyor","yaratmak","yaratan","yaratılan","yaratmadı","henüz yaratmadı","yaratmıyor","yaratmaz","asla yaratmaz","yaratsın","yaratmasın","yarat","yaratma","yaratacak zaman / mekân; yaratmak","yaratacak alet","bir kere yaratmak","bir çeşit yaratmak","az yaratmak","yaratmaya mensup","çok yaratan","daha çok yaratan","ne acayip yarattı","ne acayip yarattı"],"ar24":["خَلَقَ","يَخْلُقُ","خَلْقًا","خَالِقٌ","مَخْلُوقٌ","لَمْ يَخْلُقْ","لَمَّا يَخْلُقْ","مَا يَخْلُقُ","لَا يَخْلُقُ","لَنْ يَخْلُقَ","لِيَخْلُقْ","لَا يَخْلُقْ","اُخْلُقْ","لَا تَخْلُقْ","مَخْلَقٌ","مِخْلَقٌ","خَلْقَةٌ","خِلْقَةٌ","خُلَيْقٌ","خَلْقِيٌّ","خَلَّاقٌ","أَخْلَقُ","مَا أَخْلَقَهُ","أَخْلِقْ بِهِ"]},{"harfler":["ر","ز","ق"],"ozet":"rızıklandırdı","tr24":["rızıklandırdı","rızıklandırır / rızıklandırıyor","rızıklandırmak","rızıklandıran","rızıklandırılan","rızıklandırmadı","henüz rızıklandırmadı","rızıklandırmıyor","rızıklandırmaz","asla rızıklandırmaz","rızıklandırsın","rızıklandırmasın","rızıklandır","rızıklandırma","rızıklandıracak zaman / mekân; rızıklandırmak","rızıklandıracak alet","bir kere rızıklandırmak","bir çeşit rızıklandırmak","az rızıklandırmak","rızıklandırmaya mensup","çok rızıklandıran","daha çok rızıklandıran","ne acayip rızıklandırdı","ne acayip rızıklandırdı"],"ar24":["رَزَقَ","يَرْزُقُ","رَزْقًا","رَازِقٌ","مَرْزُوقٌ","لَمْ يَرْزُقْ","لَمَّا يَرْزُقْ","مَا يَرْزُقُ","لَا يَرْزُقُ","لَنْ يَرْزُقَ","لِيَرْزُقْ","لَا يَرْزُقْ","اُرْزُقْ","لَا تَرْزُقْ","مَرْزَقٌ","مِرْزَقٌ","رَزْقَةٌ","رِزْقَةٌ","رُزَيْقٌ","رَزْقِيٌّ","رَزَّاقٌ","أَرْزَقُ","مَا أَرْزَقَهُ","أَرْزِقْ بِهِ"]},{"harfler":["ب","س","ط"],"ozet":"genişletti (yaydı)","tr24":["genişletti","genişletir / genişletiyor","genişletmek","genişleten","genişletilen","genişletmedi","henüz genişletmedi","genişletmiyor","genişletmez","asla genişletmez","genişletsin","genişletmesin","genişlet","genişletme","genişletecek zaman / mekân; genişletmek","genişletecek alet","bir kere genişletmek","bir çeşit genişletmek","az genişletmek","genişletmeye mensup","çok genişleten","daha çok genişleten","ne acayip genişletti","ne acayip genişletti"],"ar24":["بَسَطَ","يَبْسُطُ","بَسْطًا","بَاسِطٌ","مَبْسُوطٌ","لَمْ يَبْسُطْ","لَمَّا يَبْسُطْ","مَا يَبْسُطُ","لَا يَبْسُطُ","لَنْ يَبْسُطَ","لِيَبْسُطْ","لَا يَبْسُطْ","اُبْسُطْ","لَا تَبْسُطْ","مَبْسَطٌ","مِبْسَطٌ","بَسْطَةٌ","بِسْطَةٌ","بُسَيْطٌ","بَسْطِيٌّ","بَسَّاطٌ","أَبْسَطُ","مَا أَبْسَطَهُ","أَبْسِطْ بِهِ"]},{"harfler":["ع","ب","ر"],"ozet":"geçti (ibret aldı)","tr24":["geçti","geçer / geçiyor","geçmek","geçen","geçilen","geçmedi","henüz geçmedi","geçmiyor","geçmez","asla geçmez","geçsin","geçmesin","geç","geçme","geçecek zaman / mekân; geçmek","geçecek alet","bir kere geçmek","bir çeşit geçmek","az geçmek","geçmeye mensup","çok geçen","daha çok geçen","ne acayip geçti","ne acayip geçti"],"ar24":["عَبَرَ","يَعْبُرُ","عَبْرًا","عَابِرٌ","مَعْبُورٌ","لَمْ يَعْبُرْ","لَمَّا يَعْبُرْ","مَا يَعْبُرُ","لَا يَعْبُرُ","لَنْ يَعْبُرَ","لِيَعْبُرْ","لَا يَعْبُرْ","اُعْبُرْ","لَا تَعْبُرْ","مَعْبَرٌ","مِعْبَرٌ","عَبْرَةٌ","عِبْرَةٌ","عُبَيْرٌ","عَبْرِيٌّ","عَبَّارٌ","أَعْبَرُ","مَا أَعْبَرَهُ","أَعْبِرْ بِهِ"]},{"harfler":["ح","ج","ب"],"ozet":"perdeledi (örttü)","tr24":["perdeledi","perdeler / perdeliyor","perdelemek","perdeleyen","perdelenen","perdelemedi","henüz perdelemedi","perdelemiyor","perdelemez","asla perdelemez","perdelesin","perdelemesin","perdele","perdeleme","perdeleyecek zaman / mekân; perdelemek","perdeleyecek alet","bir kere perdelemek","bir çeşit perdelemek","az perdelemek","perdelemeye mensup","çok perdeleyen","daha çok perdeleyen","ne acayip perdeledi","ne acayip perdeledi"],"ar24":["حَجَبَ","يَحْجُبُ","حَجْبًا","حَاجِبٌ","مَحْجُوبٌ","لَمْ يَحْجُبْ","لَمَّا يَحْجُبْ","مَا يَحْجُبُ","لَا يَحْجُبُ","لَنْ يَحْجُبَ","لِيَحْجُبْ","لَا يَحْجُبْ","اُحْجُبْ","لَا تَحْجُبْ","مَحْجَبٌ","مِحْجَبٌ","حَجْبَةٌ","حِجْبَةٌ","حُجَيْبٌ","حَجْبِيٌّ","حَجَّابٌ","أَحْجَبُ","مَا أَحْجَبَهُ","أَحْجِبْ بِهِ"]}];
 
 const KAT_RENK = { fiil: 'var(--c-fiil)', isim: 'var(--c-isim)', taaccub: 'var(--c-taaccub)' };
 const KAT_AD = { fiil: 'Fiil sigası', isim: 'İsim sigası', taaccub: "Ta'accüb kalıbı" };
+
+/* ============================================================
+   AKTİF KÖK (nasara veya "Farklı Fiiller"den seçilen 20 fiilden biri)
+   ============================================================ */
+let activeRootId = -1; // -1 = nasara (SIGALAR'ın kendisi), 0..19 = FARKLI_FIILLER indeksi
+
+function buildRootData(rootId){
+  if(rootId === -1) return SIGALAR;
+  const f = FARKLI_FIILLER[rootId];
+  return SIGALAR.map((row, i) => ({
+    ar: f.ar24[i],
+    tr: f.tr24[i],
+    isim: row.isim,
+    kategori: row.kategori,
+    vezin: row.vezin,
+    aciklama: row.aciklama,
+    ornek: {
+      tip: 'karsilastirma',
+      nasara_ar: row.ar,
+      nasara_tr: row.tr
+    }
+  }));
+}
+
+let CURRENT_DATA = SIGALAR;
+
+function rootLabel(rootId){
+  if(rootId === -1) return { ar: SIGALAR[0].ar, tr: SIGALAR[0].tr };
+  const f = FARKLI_FIILLER[rootId];
+  return { ar: f.ar24[0], tr: f.ozet };
+}
+
+function updateRootBadges(){
+  const badges = [document.getElementById('rootBadgeOgren'), document.getElementById('rootBadgeTest')];
+  if(activeRootId === -1){
+    badges.forEach(b => b.innerHTML = '');
+    return;
+  }
+  const { ar, tr } = rootLabel(activeRootId);
+  badges.forEach(b => {
+    b.innerHTML = `Şu an: <span class="rb-ar ar">${ar}</span> (${tr}) <button type="button" data-change-root>nasara'ya dön</button>`;
+    b.querySelector('[data-change-root]').addEventListener('click', () => setActiveRoot(-1));
+  });
+}
 
 /* ============================================================
    ÖĞREN MODE
@@ -380,6 +496,19 @@ function renderFace2(k){
 
 function renderFace3(k){
   const o = k.ornek;
+
+  if(o.tip === 'karsilastirma'){
+    return `
+      <div class="face3">
+        <div class="karsilastirma-label">Aynı kalıbın نَصَرَ karşılığı</div>
+        <div class="karsilastirma-row">
+          <div class="k-item"><span class="ar">${k.ar}</span><span class="lbl">${k.tr}</span></div>
+          <span class="k-arrow">≈</span>
+          <div class="k-item"><span class="ar">${o.nasara_ar}</span><span class="lbl">${o.nasara_tr}</span></div>
+        </div>
+      </div>`;
+  }
+
   const tipLabel = o.tip === 'ayet' ? 'Ayet-i Kerime' : (o.tip === 'hadis' ? 'Hadis-i Şerif' : 'Örnek cümle');
   const kaynakHtml = o.kaynak ? `<div class="ornek-kaynak">${o.kaynak}</div>` : '';
   const notHtml = o.not ? `<div class="ornek-not">${o.not}</div>` : '';
@@ -394,7 +523,7 @@ function renderFace3(k){
 }
 
 function renderInner(){
-  const k = SIGALAR[idx];
+  const k = CURRENT_DATA[idx];
   if(face === 0) inner.innerHTML = renderFace1(k);
   else if(face === 1) inner.innerHTML = renderFace2(k);
   else inner.innerHTML = renderFace3(k);
@@ -404,8 +533,8 @@ function renderInner(){
 }
 
 function updateProgress(){
-  progressCount.textContent = (idx+1) + ' / ' + SIGALAR.length;
-  progressFill.style.width = ((idx+1)/SIGALAR.length*100) + '%';
+  progressCount.textContent = (idx+1) + ' / ' + CURRENT_DATA.length;
+  progressFill.style.width = ((idx+1)/CURRENT_DATA.length*100) + '%';
   jumpSel.value = idx;
 }
 
@@ -415,7 +544,7 @@ function goFace(next){
 }
 
 function goCard(newIdx){
-  idx = (newIdx + SIGALAR.length) % SIGALAR.length;
+  idx = (newIdx + CURRENT_DATA.length) % CURRENT_DATA.length;
   face = 0;
   cardEl.classList.add('sliding');
   setTimeout(() => { renderInner(); updateProgress(); cardEl.classList.remove('sliding'); }, 140);
@@ -454,12 +583,44 @@ cardEl.addEventListener('touchend', (e) => {
     else goCard(idx + 1);       // sağa kaydır -> ileri
   }
 }, { passive: true });
+
+// Bilgisayarda dokunma olmadığı için aynı hareketi fare ile sürükleyerek
+// de yapabiliyoruz — eşik ve yön mantığı dokunmatikle birebir aynı.
+let mouseStartX = null, mouseStartY = null;
+cardEl.addEventListener('mousedown', (e) => {
+  mouseStartX = e.clientX;
+  mouseStartY = e.clientY;
+});
+cardEl.addEventListener('mouseup', (e) => {
+  if(mouseStartX === null) return;
+  const dx = e.clientX - mouseStartX;
+  const dy = e.clientY - mouseStartY;
+  mouseStartX = null; mouseStartY = null;
+
+  if(Math.abs(dx) > SWIPE_THRESHOLD && Math.abs(dx) > Math.abs(dy)){
+    swipeHandled = true;
+    if(dx < 0) goCard(idx - 1);
+    else goCard(idx + 1);
+  }
+});
+
 jumpSel.addEventListener('change', () => goCard(parseInt(jumpSel.value, 10)));
 document.addEventListener('keydown', (e) => {
   if(document.getElementById('ogrenView').classList.contains('hidden')) return;
   if(e.key === 'ArrowRight') goCard(idx+1);
   if(e.key === 'ArrowLeft') goCard(idx-1);
 });
+
+// İpucu metnini cihaza göre uyarla: dokunmatik cihazda kaydırma, farklı
+// (mouse'lu) cihazda sürükleme/ok tuşları öner.
+const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+const swipeHintEl = document.getElementById('swipeHint');
+if(swipeHintEl){
+  swipeHintEl.textContent = isTouchDevice
+    ? '‹ Kaydırarak diğer sigaya geç ›'
+    : '‹ Sürükleyerek veya ok tuşlarıyla diğer sigaya geç ›';
+}
+
 
 buildJumpOptions();
 renderInner();
@@ -468,30 +629,34 @@ updateProgress();
 /* ============================================================
    TEST MODE — weighted spaced repetition + interleaved quiz
    ============================================================ */
-const STORAGE_KEY = 'nasara24_boxes_v1';
-let boxes = new Array(SIGALAR.length).fill(0); // 0..4, higher = better known
-let memoryFallback = null; // used if localStorage is unavailable
+function storageKeyFor(rootId){
+  return 'nasara24_boxes_v2_' + (rootId === -1 ? 'nasara' : 'fiil' + rootId);
+}
 
-function loadBoxes(){
+let memoryFallbacks = {}; // rootId -> array, used if localStorage is unavailable
+
+function loadBoxes(rootId){
+  const key = storageKeyFor(rootId);
   try{
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     if(raw){
       const parsed = JSON.parse(raw);
-      if(Array.isArray(parsed) && parsed.length === SIGALAR.length) return parsed;
+      if(Array.isArray(parsed) && parsed.length === CURRENT_DATA.length) return parsed;
     }
   }catch(e){ /* localStorage unavailable (e.g. sandboxed preview) — fall back below */ }
-  return memoryFallback || new Array(SIGALAR.length).fill(0);
+  return memoryFallbacks[key] || new Array(CURRENT_DATA.length).fill(0);
 }
 
 function saveBoxes(){
+  const key = storageKeyFor(activeRootId);
   try{
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(boxes));
+    localStorage.setItem(key, JSON.stringify(boxes));
   }catch(e){
-    memoryFallback = boxes.slice();
+    memoryFallbacks[key] = boxes.slice();
   }
 }
 
-boxes = loadBoxes();
+let boxes = loadBoxes(activeRootId); // 0..4, higher = better known
 
 let sessionCorrect = 0, sessionWrong = 0;
 let currentQ = null;
@@ -520,13 +685,13 @@ function updateStatsBar(){
   statCorrect.textContent = sessionCorrect;
   statWrong.textContent = sessionWrong;
   const mastered = boxes.filter(b => b >= 4).length;
-  statMastered.textContent = `Ustalaşılan: ${mastered}/${SIGALAR.length}`;
+  statMastered.textContent = `Ustalaşılan: ${mastered}/${CURRENT_DATA.length}`;
 }
 
 // weighted pick: items in low boxes appear far more often than mastered ones
 function pickTargetIndex(){
   const pool = [];
-  SIGALAR.forEach((_, i) => {
+  CURRENT_DATA.forEach((_, i) => {
     const weight = 5 - boxes[i]; // box 0 -> weight 5 ... box 4 -> weight 1
     for(let w = 0; w < weight; w++) pool.push(i);
   });
@@ -534,19 +699,21 @@ function pickTargetIndex(){
 }
 
 function pickDistractorIndices(correctIdx, count){
-  const correctKat = SIGALAR[correctIdx].kategori;
-  const sameKat = SIGALAR.map((k,i)=>i).filter(i => i !== correctIdx && SIGALAR[i].kategori === correctKat);
-  const otherKat = SIGALAR.map((k,i)=>i).filter(i => i !== correctIdx && SIGALAR[i].kategori !== correctKat);
+  const correctKat = CURRENT_DATA[correctIdx].kategori;
+  const sameKat = CURRENT_DATA.map((k,i)=>i).filter(i => i !== correctIdx && CURRENT_DATA[i].kategori === correctKat);
+  const otherKat = CURRENT_DATA.map((k,i)=>i).filter(i => i !== correctIdx && CURRENT_DATA[i].kategori !== correctKat);
   const pool = shuffle(sameKat).concat(shuffle(otherKat));
   return pool.slice(0, count);
 }
 
-const TEMPLATES = ['ar_to_isim', 'isim_to_ar', 'tr_to_ar', 'cloze'];
-
 function buildQuestion(){
   const targetIdx = pickTargetIndex();
-  const target = SIGALAR[targetIdx];
-  const type = TEMPLATES[Math.floor(Math.random() * TEMPLATES.length)];
+  const target = CURRENT_DATA[targetIdx];
+  // Farklı Fiiller'de ("karsilastirma") gerçek örnek cümle olmadığından cloze sorusu sorulmaz.
+  const templates = target.ornek.tip === 'karsilastirma'
+    ? ['ar_to_isim', 'isim_to_ar', 'tr_to_ar']
+    : ['ar_to_isim', 'isim_to_ar', 'tr_to_ar', 'cloze'];
+  const type = templates[Math.floor(Math.random() * templates.length)];
   const distractorIdx = pickDistractorIndices(targetIdx, 3);
   const optionIdx = shuffle([targetIdx, ...distractorIdx]);
 
@@ -559,27 +726,27 @@ function renderQuestion(){
   qFeedback.classList.add('hidden');
   currentQ = buildQuestion();
   const { type, targetIdx, optionIdx } = currentQ;
-  const target = SIGALAR[targetIdx];
+  const target = CURRENT_DATA[targetIdx];
 
   qKicker.textContent = KAT_AD[target.kategori];
 
   if(type === 'ar_to_isim'){
     qPrompt.textContent = 'Bu sıga hangisidir?';
     qGiven.innerHTML = `<div class="big-ar ar">${target.ar}</div>`;
-    qOptions.innerHTML = optionIdx.map(i => optBtn(i, SIGALAR[i].isim)).join('');
+    qOptions.innerHTML = optionIdx.map(i => optBtn(i, CURRENT_DATA[i].isim)).join('');
   } else if(type === 'isim_to_ar'){
     qPrompt.innerHTML = `"<strong>${target.isim}</strong>" sigasının doğru yazılışı hangisidir?`;
     qGiven.innerHTML = '';
-    qOptions.innerHTML = optionIdx.map(i => optBtn(i, SIGALAR[i].ar, true)).join('');
+    qOptions.innerHTML = optionIdx.map(i => optBtn(i, CURRENT_DATA[i].ar, true)).join('');
   } else if(type === 'tr_to_ar'){
     qPrompt.textContent = 'Aşağıdaki anlama gelen kalıp hangisidir?';
     qGiven.innerHTML = `<div class="big-tr">"${target.tr}"</div>`;
-    qOptions.innerHTML = optionIdx.map(i => optBtn(i, SIGALAR[i].ar, true)).join('');
+    qOptions.innerHTML = optionIdx.map(i => optBtn(i, CURRENT_DATA[i].ar, true)).join('');
   } else { // cloze
     qPrompt.textContent = 'Boşluğa hangisi gelmelidir?';
     const o = target.ornek;
     qGiven.innerHTML = `<div class="cloze-ar ar">${o.ar_once}<span class="blank">&nbsp;</span>${o.ar_sonra}</div>`;
-    qOptions.innerHTML = optionIdx.map(i => optBtn(i, SIGALAR[i].ornek.ar_vurgu, true)).join('');
+    qOptions.innerHTML = optionIdx.map(i => optBtn(i, CURRENT_DATA[i].ornek.ar_vurgu, true)).join('');
   }
 
   [...qOptions.children].forEach(btn => {
@@ -606,7 +773,7 @@ function handleAnswer(chosenIdx){
     else if(i === chosenIdx) btn.classList.add('wrong');
   });
 
-  const target = SIGALAR[targetIdx];
+  const target = CURRENT_DATA[targetIdx];
   if(correct){
     sessionCorrect++;
     boxes[targetIdx] = Math.min(4, boxes[targetIdx] + 1);
@@ -625,36 +792,85 @@ function handleAnswer(chosenIdx){
 nextQBtn.addEventListener('click', renderQuestion);
 
 document.getElementById('resetBtn').addEventListener('click', () => {
-  boxes = new Array(SIGALAR.length).fill(0);
-  memoryFallback = null;
+  boxes = new Array(CURRENT_DATA.length).fill(0);
+  delete memoryFallbacks[storageKeyFor(activeRootId)];
   saveBoxes();
   sessionCorrect = 0; sessionWrong = 0;
   renderQuestion();
 });
 
 /* ============================================================
-   MODE SWITCH
+   FARKLI FİİLLER — kök değiştirme
+   ============================================================ */
+function setActiveRoot(rootId){
+  activeRootId = rootId;
+  CURRENT_DATA = buildRootData(rootId);
+
+  idx = 0; face = 0;
+  boxes = loadBoxes(rootId);
+  sessionCorrect = 0; sessionWrong = 0;
+
+  updateRootBadges();
+  [...document.querySelectorAll('.fiil-btn')].forEach(btn => {
+    btn.classList.toggle('active', parseInt(btn.dataset.rootId, 10) === rootId);
+  });
+
+  renderInner();
+  updateProgress();
+  if(testStarted) renderQuestion();
+}
+
+function buildFiilGrid(){
+  const grid = document.getElementById('fiilGrid');
+  let html = `
+    <button type="button" class="fiil-btn nasara-btn" data-root-id="-1">
+      <span class="fb-ar ar">${SIGALAR[0].ar}</span>
+      <span class="fb-tr">${SIGALAR[0].tr} — ana fiil</span>
+    </button>`;
+  FARKLI_FIILLER.forEach((f, i) => {
+    html += `
+      <button type="button" class="fiil-btn" data-root-id="${i}">
+        <span class="fb-ar ar">${f.ar24[0]}</span>
+        <span class="fb-tr">${f.ozet}</span>
+      </button>`;
+  });
+  grid.innerHTML = html;
+
+  [...grid.querySelectorAll('.fiil-btn')].forEach(btn => {
+    btn.addEventListener('click', () => {
+      setActiveRoot(parseInt(btn.dataset.rootId, 10));
+      switchTab('ogren');
+    });
+  });
+}
+
+/* ============================================================
+   MODE SWITCH — üç sekme
    ============================================================ */
 const tabOgren = document.getElementById('tabOgren');
 const tabTest = document.getElementById('tabTest');
+const tabFiiller = document.getElementById('tabFiiller');
 const ogrenView = document.getElementById('ogrenView');
 const testView = document.getElementById('testView');
+const fiillerView = document.getElementById('fiillerView');
 let testStarted = false;
 
-tabOgren.addEventListener('click', () => {
-  tabOgren.classList.add('active');
-  tabTest.classList.remove('active');
-  ogrenView.classList.remove('hidden');
-  testView.classList.add('hidden');
-});
+function switchTab(which){
+  const tabs = { ogren: tabOgren, test: tabTest, fiiller: tabFiiller };
+  const views = { ogren: ogrenView, test: testView, fiiller: fiillerView };
+  Object.keys(tabs).forEach(key => {
+    tabs[key].classList.toggle('active', key === which);
+    views[key].classList.toggle('hidden', key !== which);
+  });
+  if(which === 'test' && !testStarted){ testStarted = true; renderQuestion(); }
+}
 
-tabTest.addEventListener('click', () => {
-  tabTest.classList.add('active');
-  tabOgren.classList.remove('active');
-  testView.classList.remove('hidden');
-  ogrenView.classList.add('hidden');
-  if(!testStarted){ testStarted = true; renderQuestion(); }
-});
+tabOgren.addEventListener('click', () => switchTab('ogren'));
+tabTest.addEventListener('click', () => switchTab('test'));
+tabFiiller.addEventListener('click', () => switchTab('fiiller'));
+
+buildFiilGrid();
+updateRootBadges();
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
