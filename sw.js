@@ -1,47 +1,51 @@
-const CACHE_NAME = "nasara-24-siga-v15";
-const CORE_ASSETS = [
+// Uygulama dosyalarını telefona kaydeder, böylece internetsiz de açılır.
+const CACHE = "iklim-kartlari-v19";
+const ASSETS = [
   "./",
   "./index.html",
-  "./manifest.json",
+  "./manifest.webmanifest",
   "./icon-192.png",
   "./icon-512.png",
-  "./icon-180.png"
+  "./icon-maskable-512.png",
+  "./apple-touch-icon.png"
 ];
 
-self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(CORE_ASSETS))
-  );
-  self.skipWaiting();
+self.addEventListener("install", event => {
+  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
 
-self.addEventListener("activate", (event) => {
+self.addEventListener("activate", event => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Cache-first for our own files, falling back to network and caching what
-// we fetch (e.g. the Google Fonts files) so the app keeps working offline
-// after the first successful load.
-self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
+self.addEventListener("fetch", event => {
+  const req = event.request;
+  if (req.method !== "GET") return;
+  const url = new URL(req.url);
 
-  event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const networkFetch = fetch(event.request)
-        .then((response) => {
-          if (response && response.status === 200) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || networkFetch;
-    })
-  );
+  // Uygulamanın kendi dosyaları: önce internetten güncel sürüm, internet yoksa telefondaki kopya
+  if (url.origin === self.location.origin) {
+    event.respondWith(
+      fetch(req).then(res => {
+        const copy = res.clone();
+        caches.open(CACHE).then(cache => cache.put(req, copy));
+        return res;
+      }).catch(() => caches.match(req, { ignoreSearch: true }).then(hit => hit || caches.match("./index.html")))
+    );
+    return;
+  }
+
+  // Google yazı tipleri: ilk açılışta kaydedilir, sonra internetsiz de kullanılır
+  if (url.hostname === "fonts.googleapis.com" || url.hostname === "fonts.gstatic.com") {
+    event.respondWith(
+      caches.open(CACHE).then(cache => cache.match(req).then(hit => {
+        const fromNet = fetch(req).then(res => { cache.put(req, res.clone()); return res; }).catch(() => hit);
+        return hit || fromNet;
+      }))
+    );
+  }
 });
